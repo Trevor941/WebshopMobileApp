@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="WebshopMobileApp.Pages.LoginPage"
+             xmlns:pageModels="clr-namespace:WebshopMobileApp.PageModels" 
+             x:DataType="pageModels:LoginPageModel"
+             BackgroundColor="#f1f1fd"
+             Shell.NavBarIsVisible="False"
+             Shell.FlyoutItemIsVisible="False"
+             Shell.FlyoutBehavior="Disabled"
+             >
+
+    <VerticalStackLayout VerticalOptions="CenterAndExpand"  Padding="15" Spacing="15">
+        <Border StrokeThickness="6" Background="#fff">
+            <VerticalStackLayout VerticalOptions="Center"  Spacing="15">
+                
+                <Image Source="lumarlogo.png" Background="#ddd"  />
+               
+
+                <Label 
+            Text="LOGIN"
+            FontSize="45"
+            TextColor="#000"
+            Padding="10"
+                    FontAttributes="Bold"
+            VerticalOptions="Center" 
+            HorizontalTextAlignment="Start"
+              />
+                <Line Stroke="BLACK" BackgroundColor="blue" X1="-10" X2="1000" Y1="0" Y2="0" Visual="true" StrokeThickness="1" />
+                <Border 
+                  BackgroundColor="#ffffff" Padding="0" 
+                 Stroke="#000" 
+        
+                     StrokeThickness="1"
+                 >
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="25,25,25,25" />
+                                </Border.StrokeShape>
+                                <Entry 
+                 Text="{Binding Username}"
+                  BackgroundColor="#ffffff"
+                     Placeholder="Enter Username"
+                                   
+                    />
+                </Border>
+
+                <Border 
+                    BackgroundColor="#ffffff" Padding="0" 
+                   Stroke="#000" 
+        
+                       StrokeThickness="1"
+                   >
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="25,25,25,25" />
+                                    </Border.StrokeShape>
+                                    <Entry 
+                   Text="{Binding Password}"
+                    BackgroundColor="#ffffff"
+                       Placeholder="Enter Password"
+                                        IsPassword="True"
+                     
+                      />
+                </Border>
+
+                <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                            <CheckBox
+                    IsChecked="{Binding Termsandconditions}" Color="Black" />
+                            <Label
+                    Text="Accept Terms and Conditions"
+                    VerticalTextAlignment="Center" />
+                        </HorizontalStackLayout>
+
+                <Button x:Name="btnLogin"  Text="LOGIN" Command="{Binding LoginMethodCommand}" FontAttributes="Bold" CornerRadius="40" FontSize="Medium" BackgroundColor="#0698d5"/>
+
+                <Line Stroke="BLACK" BackgroundColor="blue" X1="-10" X2="1000" Y1="0" Y2="0" Visual="true" StrokeThickness="1" />
+                <HorizontalStackLayout Spacing="20" HorizontalOptions="Center">
+                    <Label Text="FORGOT PASSWORD" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+        </Border>
+
+    </VerticalStackLayout>
+</ContentPage>
