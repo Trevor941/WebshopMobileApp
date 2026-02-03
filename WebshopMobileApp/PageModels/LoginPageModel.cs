@@ -40,6 +40,9 @@ namespace WebshopMobileApp.PageModels
                     // var mainPage = new MainPageModel();
                     try
                     {
+                        Preferences.Default.Set("token", response.Token);
+                        Preferences.Default.Set("name", response.Name);
+                        Preferences.Default.Set("customerId", response.CustomerId);
                         await Shell.Current.GoToAsync($"//main");
                        
                     }

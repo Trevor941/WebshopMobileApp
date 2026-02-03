@@ -3,4 +3,3 @@ global using WebshopMobileApp.Data;
 global using WebshopMobileApp.PageModels;
 global using WebshopMobileApp.Pages;
 global using WebshopMobileApp.Services;
-global using WebshopMobileApp.Utilities;

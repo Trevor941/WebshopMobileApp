@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Handlers;
 using Syncfusion.Maui.Toolkit.Hosting;
-
 namespace WebshopMobileApp
 {
     public static class MauiProgram
@@ -12,6 +11,7 @@ namespace WebshopMobileApp
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkitMediaElement()
                 .UseMauiCommunityToolkit()
                 .ConfigureSyncfusionToolkit()
                 .ConfigureMauiHandlers(handlers =>
@@ -38,20 +38,14 @@ namespace WebshopMobileApp
     		builder.Logging.AddDebug();
     		builder.Services.AddLogging(configure => configure.AddDebug());
 #endif
-          
-            builder.Services.AddSingleton<ProjectRepository>();
-            builder.Services.AddSingleton<TaskRepository>();
-            builder.Services.AddSingleton<CategoryRepository>();
-            builder.Services.AddSingleton<TagRepository>();
-            builder.Services.AddSingleton<SeedDataService>();
-            builder.Services.AddSingleton<ModalErrorHandler>();
+            
+           
             builder.Services.AddSingleton<MainPageModel>();
-            builder.Services.AddSingleton<ProjectListPageModel>();
-            builder.Services.AddSingleton<ManageMetaPageModel>();
             builder.Services.AddSingleton<LoginRepository>();
-            builder.Services.AddTransientWithShellRoute<ProjectDetailPage, ProjectDetailPageModel>("project");
-            builder.Services.AddTransientWithShellRoute<TaskDetailPage, TaskDetailPageModel>("task");
-              builder.Services.AddTransient<MainPage>();
+            builder.Services.AddSingleton<ProductRepository>();
+            //builder.Services.AddTransientWithShellRoute<ProjectDetailPage, ProjectDetailPageModel>("project");
+            //builder.Services.AddTransientWithShellRoute<TaskDetailPage, TaskDetailPageModel>("task");
+            builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<MainPageModel>();
             builder.Services.AddTransient<LoginPageModel>();
             return builder.Build();

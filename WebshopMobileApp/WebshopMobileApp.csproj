@@ -50,9 +50,7 @@
 		  <Color>#000000</Color>
 		  <ForegroundFile>Resources\AppIcon\appiconfg.svg</ForegroundFile>
 		</MauiIcon>-->
-		<MauiIcon Include="Resources\AppIcon\appicon.jpg"
-          ForegroundFile="Resources\AppIcon\appicon.jpg"
-          BackgroundColor="#FFFFFF" />
+		<MauiIcon Include="Resources\AppIcon\appicon.jpg" ForegroundFile="Resources\AppIcon\appicon.jpg" BackgroundColor="#FFFFFF" />
 
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\lumarlogosvg.svg" Color="#0698d5" BaseSize="128,128" />
@@ -69,6 +67,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="6.0.1" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
 	</ItemGroup>
@@ -84,6 +83,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Pages\Controls\SlotCardView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Pages\LoginPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

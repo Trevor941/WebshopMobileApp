@@ -8,7 +8,7 @@
     Shell.FlyoutBehavior="Flyout"
     Title="WebshopMobileApp">
     <ShellContent
-      Title="Dashboard"
+      Title="Sign Out"
       Icon="{StaticResource IconDashboard}"
       ContentTemplate="{DataTemplate pages:LoginPage}"
       Route="login" />
@@ -17,7 +17,7 @@
         Icon="{StaticResource IconDashboard}"
         ContentTemplate="{DataTemplate pages:MainPage}"
         Route="main" />
-    <ShellContent
+    <!--<ShellContent
       Title="Manage Meta"
       Icon="{StaticResource IconMeta}"
       ContentTemplate="{DataTemplate pages:ManageMetaPage}"
@@ -27,7 +27,7 @@
         Title="Projects"
         Icon="{StaticResource IconProjects}"
         ContentTemplate="{DataTemplate pages:ProjectListPage}"
-        Route="projects" />
+        Route="projects" />-->
 
   
 
