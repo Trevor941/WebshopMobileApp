@@ -13,6 +13,9 @@ namespace WebshopMobileApp.PageModels
         private List<TblPromoPicturesSet> _slots = [];
         [ObservableProperty]
         private List<Category> _categories = [];
+        [ObservableProperty]
+        private bool _iSVisibleSpinner = true;
+        
         //public List<(int CategoryId, string Category)> _categories { get; set; } = new();
         public MainPageModel(ProductRepository productRepository)
         {
@@ -24,15 +27,38 @@ namespace WebshopMobileApp.PageModels
         {
             await GetProducts();
             await GetSlots();
+            ISVisibleSpinner = false;
         }
 
         private async Task GetProducts()
         {
-            Products = await _productRepository.GetProductsFromAPICall();
-            if(Products.Count > 0)
+            try
             {
+                await _productRepository.CreateTableProductsLocally();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            var localproducts = await _productRepository.GetProductsLocally();
+            if (localproducts.Count > 0)
+            {
+                Products = localproducts;
                 await GetCategories();
             }
+            else
+            {
+                Products = await _productRepository.GetProductsFromAPICall();
+                if (Products.Count > 0)
+                {
+                    foreach (var product in Products)
+                    {
+                        await _productRepository.InsertProduct(product);
+                    }
+                    await GetCategories();
+                }
+            }
+           
         }
 
         private async Task GetSlots()

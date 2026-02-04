@@ -6,22 +6,23 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.Controls;
+using WebshopMobileApp.Pages.TabbedPages;
+using Microsoft.Maui.Controls;
 namespace WebshopMobileApp.PageModels
 {
     public partial class LoginPageModel : ObservableObject
     {
         private readonly LoginRepository _loginRepository;
-
         [ObservableProperty]
-        private string _username = string.Empty;
+        private string _username = "trey94kingz@gmail.com";//string.Empty;
         [ObservableProperty]
-        private string _password = string.Empty;
+        private string _password = "123456"; //string.Empty;
         [ObservableProperty]
         private bool _termsandconditions = false;
         
         public LoginPageModel(LoginRepository loginRepository)
         {
-           _loginRepository = loginRepository;
+            _loginRepository = loginRepository;
         }
 
         [RelayCommand]
@@ -43,8 +44,8 @@ namespace WebshopMobileApp.PageModels
                         Preferences.Default.Set("token", response.Token);
                         Preferences.Default.Set("name", response.Name);
                         Preferences.Default.Set("customerId", response.CustomerId);
-                        await Shell.Current.GoToAsync($"//main");
-                       
+                        // await Shell.Current.GoToAsync($"//tabbedpage");
+                       // Application.Current.MainPage = new NavigationPage(new WebshopMobileApp.Pages.MainPage());
                     }
                     catch (Exception ex)
                     {

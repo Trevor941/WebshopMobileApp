@@ -14,7 +14,7 @@ namespace WebshopMobileApp
             // Set the status bar color
             if (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
             {
-                Window.SetStatusBarColor(Android.Graphics.Color.ParseColor("#0698d5")); // Use your desired color
+                Window.SetStatusBarColor(Android.Graphics.Color.ParseColor("#000000")); // Use your desired color
             }
         }
     }

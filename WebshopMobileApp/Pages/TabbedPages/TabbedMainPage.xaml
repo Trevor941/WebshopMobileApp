@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="WebshopMobileApp.Pages.TabbedPages.TabbedMainPage"
+                xmlns:local="clr-namespace:WebshopMobileApp.Pages.TabbedPages"
+                xmlns:localPages="clr-namespace:WebshopMobileApp.Pages"
+             Title="TabbedMainPage"
+            UnselectedTabColor="#ddd"
+            BarBackgroundColor="#0698d5"
+            SelectedTabColor="#fff"
+            >
+
+
+    <!--<local:Home Title="Home" IconImageSource="cart1.png" />
+    <local:Catalog Title="Catalog" IconImageSource="cart1.png" />
+    <local:Favorites Title="Favorites" IconImageSource="cart1.png" />
+    <local:Profile Title="Profile" IconImageSource="cart1.png" />-->
+</TabbedPage>

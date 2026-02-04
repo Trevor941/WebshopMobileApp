@@ -5,7 +5,7 @@
     
     
     
-    <Border StrokeThickness="1" Stroke="Gray" Padding="0" StrokeShape="RoundRectangle 5">
+    <Border StrokeThickness="0" Stroke="#000" Padding="0" StrokeShape="RoundRectangle 0">
         <VerticalStackLayout Spacing="0">
             <!-- The inner WebView -->
             <WebView x:Name="VideoWebView" HeightRequest="250" />

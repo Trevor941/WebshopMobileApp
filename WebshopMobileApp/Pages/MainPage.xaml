@@ -8,7 +8,7 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="WebshopMobileApp.Pages.MainPage"
              x:DataType="pageModels:MainPageModel"
-             Title="Main Page">
+             Title="">
 
     <ContentPage.Behaviors>
         <toolkit:EventToCommandBehavior
@@ -24,16 +24,16 @@
 
                 <!-- HEADER -->
                 <CollectionView.Header>
-                    <VerticalStackLayout Spacing="30"
-                                         Padding="{StaticResource LayoutPadding}">
+                    <VerticalStackLayout Spacing="0"
+                                         Padding="10" BackgroundColor="#0698d5">
 
                         <Label Text="Weekly Promotions"
                                Padding="5"
                                Background="#0698d5"
                                FontSize="18"
                                TextColor="White"
-                               Style="{StaticResource Title2}" />
-
+                               Style="{StaticResource Title2}" HorizontalTextAlignment="Center" />
+                        <ActivityIndicator IsVisible="{Binding ISVisibleSpinner}" IsRunning="True" Color="#0698d5" />
                         <ScrollView Orientation="Horizontal"
                                     Margin="-30,0">
                             <HorizontalStackLayout
@@ -45,7 +45,7 @@
                                     <DataTemplate x:DataType="models:TblPromoPicturesSet">
                                         <VerticalStackLayout Spacing="6">
                                             <controls:SlotCardView WidthRequest="320" />
-                                            <Label Text="{Binding Id}" />
+                                            <!--<Label Text="{Binding Id}" />-->
                                         </VerticalStackLayout>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
@@ -73,11 +73,11 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Category">
-                        <Border Stroke="#DDDDDD"
+                        <Border Stroke="#000"
                                 StrokeThickness="1"
-                                StrokeShape="RoundRectangle 12"
+                                StrokeShape="RoundRectangle 0"
                                 BackgroundColor="White"
-                                Padding="10">
+                                Padding="0">
 
                             <Image Source="{Binding FileUrl}"
                                    Aspect="AspectFit"

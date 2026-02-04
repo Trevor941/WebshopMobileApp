@@ -5,8 +5,35 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:sf="clr-namespace:Syncfusion.Maui.Toolkit.SegmentedControl;assembly=Syncfusion.Maui.Toolkit"
     xmlns:pages="clr-namespace:WebshopMobileApp.Pages"
+    xmlns:pagestabbed="clr-namespace:WebshopMobileApp.Pages.TabbedPages"
     Shell.FlyoutBehavior="Flyout"
-    Title="WebshopMobileApp">
+    Shell.TitleColor="#fff"
+    Shell.BackgroundColor="#0698d5"
+    Shell.FlyoutBackdrop="#0698d5"
+    Shell.ForegroundColor="#FFFFFF"
+    Title="WebshopMobileApp"
+    Shell.TabBarBackgroundColor="#0698d5"
+    Shell.TabBarForegroundColor="#fff"
+    Shell.TabBarUnselectedColor="#ddd"
+    Shell.TabBarTitleColor="#fff"
+    >
+
+
+    <FlyoutItem Title="Menu">
+        <Tab Title="Home" Icon="cart1.png">
+            <ShellContent ContentTemplate="{DataTemplate pages:MainPage}" />
+        </Tab>
+        <Tab Title="Catalog" Icon="catalog.png">
+            <ShellContent ContentTemplate="{DataTemplate pagestabbed:Catalog}" />
+        </Tab>
+        <Tab Title="Favorites" Icon="heart.png">
+            <ShellContent ContentTemplate="{DataTemplate pagestabbed:Favorites}" />
+        </Tab>
+        <Tab Title="Profile" Icon="avatar.png">
+            <ShellContent ContentTemplate="{DataTemplate pagestabbed:Profile}" />
+        </Tab>
+    </FlyoutItem>
+
     <ShellContent
       Title="Sign Out"
       Icon="{StaticResource IconDashboard}"
@@ -17,19 +44,30 @@
         Icon="{StaticResource IconDashboard}"
         ContentTemplate="{DataTemplate pages:MainPage}"
         Route="main" />
-    <!--<ShellContent
-      Title="Manage Meta"
-      Icon="{StaticResource IconMeta}"
-      ContentTemplate="{DataTemplate pages:ManageMetaPage}"
-      Route="manage" />
-    
     <ShellContent
-        Title="Projects"
-        Icon="{StaticResource IconProjects}"
-        ContentTemplate="{DataTemplate pages:ProjectListPage}"
-        Route="projects" />-->
-
-  
+     Title="Test"
+     Icon="{StaticResource IconDashboard}"
+     ContentTemplate="{DataTemplate pages:TestPage}"
+     Route="test" />
+    
+    <Shell.TitleView>
+        <Grid WidthRequest="190" HeightRequest="100" Padding="0,12,0,0" VerticalOptions="Center">
+            <Image
+                Source="lumarlogo.png"
+                Aspect="AspectFit"
+                VerticalOptions="Fill"
+                HorizontalOptions="Center" />
+        </Grid>
+    </Shell.TitleView>
+    <Shell.ToolbarItems>
+        <ToolbarItem
+        IconImageSource="cart1.png"
+        Text="Cart"
+        Order="Primary"
+        Priority="0"
+        />
+       
+    </Shell.ToolbarItems>
 
     <Shell.FlyoutFooter>
         <Grid Padding="15">
