@@ -8,7 +8,11 @@ namespace WebshopMobileApp
         {
             InitializeComponent();
             Application.Current.UserAppTheme = AppTheme.Light;
-           // MainPage = new NavigationPage(new TabbedMainPage());
+            //MainPage = new NavigationPage(new TabbedParentPage())
+            //{
+            //    // BarBackgroundColor = trevorGray
+            //};
+
         }
 
         protected override Window CreateWindow(IActivationState? activationState)

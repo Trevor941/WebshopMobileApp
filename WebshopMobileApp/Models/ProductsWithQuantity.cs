@@ -10,6 +10,8 @@ namespace WebshopMobileApp.Models
     {
         public int Quantity { get; set; } = 1;
         public bool IsPromoted { get; set; } = false;
+        public string? FileUrl { get; set; }
+        public int? ProductServerId { get; set; } 
     }
 
     public class Category 

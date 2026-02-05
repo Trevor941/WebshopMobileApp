@@ -89,7 +89,8 @@ namespace WebshopMobileApp.Data
                     CategoryId = reader.GetInt32(23),
                     Category = reader.GetString(24),
                     Quantity = reader.GetInt32(25),
-                    IsPromoted = reader.GetBoolean(26)
+                    IsPromoted = reader.GetBoolean(26),
+                    ProductServerId = reader.GetInt32(27),
                 });
             }
 
@@ -136,7 +137,8 @@ namespace WebshopMobileApp.Data
                 var createTableCmd = connection.CreateCommand();
                 createTableCmd.CommandText = @"
           
-              
+                            
+
            CREATE TABLE Products (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
 
@@ -173,7 +175,8 @@ namespace WebshopMobileApp.Data
                         CategoryId INTEGER NOT NULL,
                         Category TEXT NOT NULL,
                         Quantity INTEGER NOT NULL,
-                       IsPromoted INTEGER NOT NULL
+                       IsPromoted INTEGER NOT NULL,
+                         ProductServerId INTEGER NOT NULL
                     );
                     ";
           
@@ -193,6 +196,7 @@ namespace WebshopMobileApp.Data
             await connection.OpenAsync();
             var insertProductCommand = connection.CreateCommand();
             insertProductCommand.CommandText = @"
+                    
                     INSERT INTO Products (
                         Code,
                         Description,
@@ -219,7 +223,8 @@ namespace WebshopMobileApp.Data
                         CategoryId,
                         Category,
                         Quantity,
-                       IsPromoted
+                       IsPromoted,
+                       ProductServerId
                     )
                     VALUES (
                         @Code,
@@ -247,7 +252,8 @@ namespace WebshopMobileApp.Data
                         @CategoryId,
                         @Category,
                         @Quantity,
-                       @IsPromoted
+                       @IsPromoted,
+                       @ProductServerId
                     );
                 ";
 
@@ -302,7 +308,9 @@ namespace WebshopMobileApp.Data
                     insertProductCommand.Parameters.AddWithValue("@Quantity", DbType.Int32).Value = product.Quantity;
                     insertProductCommand.Parameters.AddWithValue("@IsPromoted", DbType.Int32).Value =
                         product.IsPromoted ? 1 : 0;
-            await  insertProductCommand.ExecuteNonQueryAsync();
+                   insertProductCommand.Parameters.AddWithValue("@ProductServerId", DbType.Int32).Value = product.Id;
+
+            await insertProductCommand.ExecuteNonQueryAsync();
                 }
 
 }

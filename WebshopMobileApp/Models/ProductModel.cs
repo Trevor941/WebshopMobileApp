@@ -17,6 +17,7 @@ namespace WebshopMobileApp.Models
         public decimal QuantityOnHand { get; set; } = 0;
         public bool HasImage { get; set; } = false;
         public byte[]? Image { get; set; }
+        
         [Column(TypeName = "decimal(18,2)")]
         public decimal? Price { get; set; }
         [Column(TypeName = "decimal(18,2)")]

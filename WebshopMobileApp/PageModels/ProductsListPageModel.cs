@@ -1,10 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WebshopMobileApp.Models;
 
 namespace WebshopMobileApp.PageModels
 {
-    public partial class MainPageModel : ObservableObject
+    public partial class ProductsListPageModel : ObservableObject
     {
         private readonly ProductRepository _productRepository;
         [ObservableProperty]
@@ -18,7 +23,7 @@ namespace WebshopMobileApp.PageModels
         [ObservableProperty]
         private string _deliveryDate = "";
         //public List<(int CategoryId, string Category)> _categories { get; set; } = new();
-        public MainPageModel(ProductRepository productRepository)
+        public ProductsListPageModel(ProductRepository productRepository)
         {
             _productRepository = productRepository;
         }
@@ -27,9 +32,9 @@ namespace WebshopMobileApp.PageModels
         private async Task LoadItems()
         {
             await GetProducts();
-            await GetSlots();
+            //await GetSlots();
             ISVisibleSpinner = false;
-            DeliveryDate = "Delivery Date: " + DateTime.Now.AddDays(1).ToString("dd MMM yyyy"); 
+            DeliveryDate = "Delivery Date: " + DateTime.Now.AddDays(1).ToString("dd MMM yyyy");
         }
 
         private async Task GetProducts()
@@ -45,8 +50,8 @@ namespace WebshopMobileApp.PageModels
             var localproducts = await _productRepository.GetProductsLocally();
             if (localproducts.Count > 0)
             {
-                Products = localproducts;
-                await GetCategories();
+                Products = localproducts.Take(10).ToList();
+                 await ProductFileUrls();
             }
             else
             {
@@ -57,10 +62,15 @@ namespace WebshopMobileApp.PageModels
                     {
                         await _productRepository.InsertProduct(product);
                     }
-                    await GetCategories();
+                    var localproducts2 = await _productRepository.GetProductsLocally();
+                    if (localproducts2.Count > 0)
+                    {
+                        Products = localproducts2.Take(10).ToList();
+                        await ProductFileUrls();
+                    }
                 }
             }
-           
+
         }
 
         private async Task GetSlots()
@@ -68,21 +78,19 @@ namespace WebshopMobileApp.PageModels
             Slots = await _productRepository.GetSlotsFromAPICall();
         }
 
-
-        private async Task GetCategories()
+        private async Task ProductFileUrls()
         {
-            var cati = Products.Where(p => !string.IsNullOrEmpty(p.Category))
-              .GroupBy(p => new { p.CategoryId, p.Category })
-              .Select(g => (g.Key.CategoryId, g.Key.Category)).OrderBy(x => x.Category).ToList();
-            foreach (var cat in cati)
+            foreach (var x in Products)
             {
-                var realcat = new Category();
-                realcat.CategoryId = cat.CategoryId;
-                realcat.CategoryName = cat.Category;
-                realcat.FileUrl = "https://orders.lumarfoods.co.za:20603/categories/" + cat.CategoryId + ".png";
-                Categories.Add(realcat);    
+                if (x.HasImage)
+                {
+                    x.FileUrl = "https://orders.lumarfoods.co.za:20603/images/" + x.ProductServerId + ".png";
+                }
+                else
+                {
+                    x.FileUrl = "https://orders.lumarfoods.co.za:20603/images/300px-no_image_available.svg.png";
+                }
             }
         }
     }
-
 }

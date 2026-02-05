@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Handlers;
 using Syncfusion.Maui.Toolkit.Hosting;
+using WebshopMobileApp.Pages.TabbedPages;
 namespace WebshopMobileApp
 {
     public static class MauiProgram
@@ -41,13 +42,16 @@ namespace WebshopMobileApp
             
            
             builder.Services.AddSingleton<MainPageModel>();
+            builder.Services.AddSingleton<ProductsListPageModel>();
             builder.Services.AddSingleton<LoginRepository>();
             builder.Services.AddSingleton<ProductRepository>();
             //builder.Services.AddTransientWithShellRoute<ProjectDetailPage, ProjectDetailPageModel>("project");
             //builder.Services.AddTransientWithShellRoute<TaskDetailPage, TaskDetailPageModel>("task");
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<MainPageModel>();
+            builder.Services.AddTransient<TabbedParentPage>();
             builder.Services.AddTransient<LoginPageModel>();
+            builder.Services.AddSingleton<IAppNavigationService, AppNavigationService>();
             return builder.Build();
         }
     }

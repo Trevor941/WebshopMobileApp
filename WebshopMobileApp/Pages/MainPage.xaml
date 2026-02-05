@@ -24,44 +24,58 @@
 
                 <!-- HEADER -->
                 <CollectionView.Header>
-                    <VerticalStackLayout Spacing="0"
-                                         Padding="10" BackgroundColor="#0698d5">
+                    <VerticalStackLayout Spacing="0">
 
-                        <Label Text="Weekly Promotions"
-                               Padding="5"
-                               Background="#0698d5"
+                        <!-- TOP LABEL -->
+                        <Label Text="{Binding DeliveryDate}"
+                           Padding="10"
+                           Margin="0,0,0,10"
+                           BackgroundColor="#0698d5"
+                           FontSize="16"
+                           TextColor="White"
+                           Style="{StaticResource Title2}"
+                           HorizontalTextAlignment="Center" />
+
+                        <!-- BLUE SECTION -->
+                        <VerticalStackLayout Spacing="0"
+                             Padding="10"
+                             BackgroundColor="#0698d5">
+
+                            <Label Text="Weekly Promotions"
+                               Padding="1"
                                FontSize="18"
                                TextColor="White"
-                               Style="{StaticResource Title2}" HorizontalTextAlignment="Center" />
-                        <ActivityIndicator IsVisible="{Binding ISVisibleSpinner}" IsRunning="True" Color="#0698d5" />
-                        <ScrollView Orientation="Horizontal"
-                                    Margin="-30,0">
-                            <HorizontalStackLayout
-                                Spacing="15"
-                                Padding="30,0"
-                                BindableLayout.ItemsSource="{Binding Slots}">
+                               Style="{StaticResource Title2}"
+                               HorizontalTextAlignment="Center" />
 
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="models:TblPromoPicturesSet">
-                                        <VerticalStackLayout Spacing="6">
-                                            <controls:SlotCardView WidthRequest="320" />
-                                            <!--<Label Text="{Binding Id}" />-->
-                                        </VerticalStackLayout>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
+                                <ActivityIndicator
+                                IsVisible="{Binding ISVisibleSpinner}"
+                                IsRunning="True"
+                                Color="White" />
 
-                            </HorizontalStackLayout>
-                        </ScrollView>
+                            <ScrollView Orientation="Horizontal"
+                        Margin="-30,0">
+                                <HorizontalStackLayout
+                    Spacing="15"
+                    Padding="30,0"
+                    BindableLayout.ItemsSource="{Binding Slots}">
 
-                        <Label Text="Categories"
-                               Padding="5"
-                               Background="#0698d5"
-                               FontSize="18"
-                               TextColor="White"
-                               Style="{StaticResource Title2}" />
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="models:TblPromoPicturesSet">
+                                            <VerticalStackLayout Spacing="6">
+                                                <controls:SlotCardView WidthRequest="320" />
+                                            </VerticalStackLayout>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+
+                                </HorizontalStackLayout>
+                            </ScrollView>
+
+                        </VerticalStackLayout>
 
                     </VerticalStackLayout>
                 </CollectionView.Header>
+
 
                 <!-- CATEGORIES GRID -->
                 <CollectionView.ItemsLayout>
@@ -79,12 +93,19 @@
                                 BackgroundColor="White"
                                 Padding="0">
 
-                            <Image Source="{Binding FileUrl}"
+                            <!--<Image Source="avatar.png"
                                    Aspect="AspectFit"
                                    HeightRequest="80"
                                    WidthRequest="100"
                                    HorizontalOptions="Center"
-                                   VerticalOptions="Center" />
+                                   VerticalOptions="Center" />-->
+                            <Image Source="{Binding FileUrl}"
+                                    Aspect="AspectFit"
+                                    HeightRequest="80"
+                                    WidthRequest="100"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center" />
+
 
                         </Border>
                     </DataTemplate>

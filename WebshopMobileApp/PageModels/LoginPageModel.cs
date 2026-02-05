@@ -13,6 +13,7 @@ namespace WebshopMobileApp.PageModels
     public partial class LoginPageModel : ObservableObject
     {
         private readonly LoginRepository _loginRepository;
+        private readonly IAppNavigationService _navigation;
         [ObservableProperty]
         private string _username = "trey94kingz@gmail.com";//string.Empty;
         [ObservableProperty]
@@ -20,9 +21,10 @@ namespace WebshopMobileApp.PageModels
         [ObservableProperty]
         private bool _termsandconditions = false;
         
-        public LoginPageModel(LoginRepository loginRepository)
+        public LoginPageModel(LoginRepository loginRepository, IAppNavigationService navigation)
         {
             _loginRepository = loginRepository;
+            _navigation = navigation;
         }
 
         [RelayCommand]
@@ -44,8 +46,10 @@ namespace WebshopMobileApp.PageModels
                         Preferences.Default.Set("token", response.Token);
                         Preferences.Default.Set("name", response.Name);
                         Preferences.Default.Set("customerId", response.CustomerId);
-                        // await Shell.Current.GoToAsync($"//tabbedpage");
-                       // Application.Current.MainPage = new NavigationPage(new WebshopMobileApp.Pages.MainPage());
+                     //   _navigation.GoToMainApp();
+                        await Shell.Current.GoToAsync($"//home");
+
+                        // Application.Current.MainPage = new NavigationPage(new WebshopMobileApp.Pages.MainPage());
                     }
                     catch (Exception ex)
                     {

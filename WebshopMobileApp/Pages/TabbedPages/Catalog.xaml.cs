@@ -2,8 +2,9 @@ namespace WebshopMobileApp.Pages.TabbedPages;
 
 public partial class Catalog : ContentPage
 {
-	public Catalog()
+	public Catalog(ProductsListPageModel model)
 	{
 		InitializeComponent();
-	}
+        BindingContext = model;
+    }
 }

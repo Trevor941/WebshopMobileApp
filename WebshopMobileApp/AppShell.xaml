@@ -19,37 +19,37 @@
     >
 
 
-    <FlyoutItem Title="Menu">
-        <Tab Title="Home" Icon="cart1.png">
-            <ShellContent ContentTemplate="{DataTemplate pages:MainPage}" />
-        </Tab>
-        <Tab Title="Catalog" Icon="catalog.png">
-            <ShellContent ContentTemplate="{DataTemplate pagestabbed:Catalog}" />
-        </Tab>
-        <Tab Title="Favorites" Icon="heart.png">
-            <ShellContent ContentTemplate="{DataTemplate pagestabbed:Favorites}" />
-        </Tab>
-        <Tab Title="Profile" Icon="avatar.png">
-            <ShellContent ContentTemplate="{DataTemplate pagestabbed:Profile}" />
-        </Tab>
-    </FlyoutItem>
 
     <ShellContent
       Title="Sign Out"
       Icon="{StaticResource IconDashboard}"
       ContentTemplate="{DataTemplate pages:LoginPage}"
       Route="login" />
-    <ShellContent
+    <!--<ShellContent
         Title="Dashboard"
         Icon="{StaticResource IconDashboard}"
         ContentTemplate="{DataTemplate pages:MainPage}"
-        Route="main" />
+        Route="main" />-->
     <ShellContent
      Title="Test"
      Icon="{StaticResource IconDashboard}"
      ContentTemplate="{DataTemplate pages:TestPage}"
      Route="test" />
-    
+
+    <TabBar Title="Menu" Route="main">
+        <Tab Title="Home" Icon="home.png">
+            <ShellContent Route="home" ContentTemplate="{DataTemplate pages:MainPage}" />
+        </Tab>
+        <Tab Title="Catalog" Icon="catalog.png">
+            <ShellContent Route="catalog" ContentTemplate="{DataTemplate pagestabbed:Catalog}" />
+        </Tab>
+        <Tab Title="Favorites" Icon="heart.png">
+            <ShellContent Route="favorites" ContentTemplate="{DataTemplate pagestabbed:Favorites}" />
+        </Tab>
+        <Tab Title="Profile" Icon="avatar.png">
+            <ShellContent Route="profile" ContentTemplate="{DataTemplate pagestabbed:Profile}" />
+        </Tab>
+    </TabBar>
     <Shell.TitleView>
         <Grid WidthRequest="190" HeightRequest="100" Padding="0,12,0,0" VerticalOptions="Center">
             <Image
