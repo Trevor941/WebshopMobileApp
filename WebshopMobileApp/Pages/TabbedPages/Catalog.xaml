@@ -16,158 +16,138 @@
             Command="{Binding LoadItemsCommand}" />
     </ContentPage.Behaviors>
 
-    <pullToRefresh:SfPullToRefresh>
-        <pullToRefresh:SfPullToRefresh.PullableContent>
+ 
 
-            <!--<CollectionView ItemsSource="{Binding Products}"
-                            Margin="10">
+    <VerticalStackLayout Spacing="0" Padding="0, 0, 0 ,0">
+        <Border
+            BackgroundColor="#ffffff"
+            Stroke="#0698d5"
+            StrokeThickness="10"
+            Margin="12"
+            Padding="0">
 
-                <CollectionView.Header>
-                    <VerticalStackLayout Spacing="0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="0" />
+            </Border.StrokeShape>
 
-                        <Label Text="{Binding DeliveryDate}"
-                           Padding="10"
-                           Margin="0,0,0,10"
-                           BackgroundColor="#0698d5"
-                           FontSize="16"
-                           TextColor="White"
-                           Style="{StaticResource Title2}"
-                           HorizontalTextAlignment="Center" />
+            <Grid ColumnDefinitions="Auto,*" VerticalOptions="Center" Background="#fff">
+                <!-- Search Icon -->
+                <Image
+            Source="search.png"
+                    
+            WidthRequest="25"
+            HeightRequest="25"
+            VerticalOptions="Center"
+            Margin="5,0,8,0" />
 
-                        <VerticalStackLayout Spacing="0"
-                             Padding="10"
-                             BackgroundColor="#0698d5">
+                <!-- Search Entry -->
+                <Entry
+                 Text="{Binding SearchText, Mode=TwoWay}"
+                Grid.Column="1"
+                Placeholder="Search?"
+                FontAttributes="Bold"
+                PlaceholderColor="#666"
+                FontSize="14"
+                TextColor="#666"
+                VerticalOptions="Center">
 
-                            <Label Text="Weekly Promotions"
-                               Padding="1"
-                               FontSize="18"
-                               TextColor="White"
-                               Style="{StaticResource Title2}"
-                               HorizontalTextAlignment="Center" />
+                    <!--<Entry.Behaviors>
+                        <toolkit:EventToCommandBehavior
+                        EventName="TextChanged"
+                        Command="{Binding FilterProductsCommand}"
+                       />
+                    </Entry.Behaviors>-->
+                </Entry>
+            </Grid>
+        </Border>
 
-                            <ActivityIndicator
-                                IsVisible="{Binding ISVisibleSpinner}"
-                                IsRunning="True"
-                                Color="White" />
-
-                            <ScrollView Orientation="Horizontal"
-                        Margin="-30,0">
-                                <HorizontalStackLayout
-                    Spacing="15"
-                    Padding="30,0"
-                    BindableLayout.ItemsSource="{Binding Slots}">
-
-                                    <BindableLayout.ItemTemplate>
-                                        <DataTemplate x:DataType="models:TblPromoPicturesSet">
-                                            <VerticalStackLayout Spacing="6">
-                                                <controls:SlotCardView WidthRequest="320" />
-                                            </VerticalStackLayout>
-                                        </DataTemplate>
-                                    </BindableLayout.ItemTemplate>
-
-                                </HorizontalStackLayout>
-                            </ScrollView>
-
-                        </VerticalStackLayout>
-
-                    </VerticalStackLayout>
-                </CollectionView.Header>
-
-
-                <CollectionView.ItemsLayout>
-                    <GridItemsLayout Orientation="Vertical"
-                                     Span="3"
-                                     HorizontalItemSpacing="10"
-                                     VerticalItemSpacing="10" />
-                </CollectionView.ItemsLayout>
-
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:ProductsWithQuantity">
-                        <Border Stroke="#000"
-                                StrokeThickness="1"
-                                StrokeShape="RoundRectangle 0"
-                                BackgroundColor="White"
-                                Padding="0">
-
-                            <Image Source="{Binding FileUrl}"
-                                    Aspect="AspectFit"
-                                    HeightRequest="80"
-                                    WidthRequest="100"
-                                    HorizontalOptions="Center"
-                                    VerticalOptions="Center" />
-
-
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-
-            </CollectionView>-->
-      
-            <CollectionView x:Name="ProductsCollectionView"
-                    ItemsSource="{Binding Products}"
-                    Margin="10">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate  x:DataType="models:ProductsWithQuantity">
-                        <Border Stroke="#f1f1f1" BackgroundColor="blue"
-                        StrokeThickness="1" 
-                        Padding="10" 
-                                StrokeShape="RoundRectangle 18"
-                        Margin="5" Background="#fff">
-                            <Grid ColumnDefinitions="*,2*" RowDefinitions="Auto,Auto,Auto"  >
-                                <!-- Product Image -->
-                                <Border Stroke="Black" StrokeThickness="0" Padding="0"  StrokeShape="RoundRectangle 8">
-                                    <Image Grid.Column="0"
-                                        Source="{Binding FileUrl}"
-                                        Aspect="AspectFill"
-                                                HeightRequest="120"
-                                                BackgroundColor="red"
+        <CollectionView x:Name="ProductsCollectionView"
+        ItemsSource="{Binding Products}"
+        Margin="10"  HeightRequest="550">
+            <CollectionView.ItemTemplate>
+                <DataTemplate  x:DataType="models:ProductsWithQuantity">
+                    <Border Stroke="#f1f1f1" BackgroundColor="blue"
+            StrokeThickness="1" 
+            Padding="10" 
+                    StrokeShape="RoundRectangle 18"
+            Margin="5" Background="#fff">
+                        <Grid ColumnDefinitions="*,2*" RowDefinitions="Auto,Auto,Auto"  >
+                            <!-- Product Image -->
+                            <Border Stroke="Black" StrokeThickness="0" Padding="0"  StrokeShape="RoundRectangle 8">
+                                <Image Grid.Column="0"
+                            Source="{Binding FileUrl}"
+                            Aspect="AspectFill"
+                                    HeightRequest="120"
+                                    BackgroundColor="#0698d5"
         
-                                        Margin="0"/>
+                            Margin="0"/>
 
-                                </Border>
-                               
-                                <!-- Product Details -->
-                                <StackLayout Grid.Column="1" Margin="10,0,0,0" Spacing="5">
-                                    <!-- Title -->
-                                    <Label Text="{Binding Description}" FontSize="Small" FontAttributes="Bold"/>
-                                    <!-- Product Code -->
-                                    <Label Text="{Binding Code}" FontSize="Small" TextColor="Gray"/>
+                            </Border>
 
-                                    <!-- Price and Availability -->
-                                    <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto">
-                                        <Label Text="{Binding Price, StringFormat='${0:F2}'}"
-                                       FontSize="Medium" TextColor="#0698d5" FontAttributes="Bold"
-                                       Grid.Column="0"/>
-                                        <Label Text="Available"
-                                       FontSize="Small"
-                                       TextColor="Green"
-                                       Margin="20,0,0,0"
-                                       Grid.Column="1"/>
-                                    </Grid>
+                            <!-- Product Details -->
+                            <StackLayout Grid.Column="1" Margin="10,0,0,0" Spacing="5">
+                                <!-- Title -->
+                                <Label Text="{Binding Description}" FontSize="Small" FontAttributes="Bold"/>
+                                <!-- Product Code -->
+                                <Label Text="{Binding Code}" FontSize="Small" TextColor="Gray"/>
 
-                                    <!-- Quantity and Add Button -->
-                                    <Grid ColumnDefinitions="Auto" RowDefinitions="Auto" ColumnSpacing="5">
-                                        <!-- Decrement Button -->
-                                        <!--<Label Text="_" WidthRequest="20" Margin="0, 1" FontSize="Large" Grid.Column="0"/>
-                                        --><!-- Quantity Label -->
-                                        <!-- Decrement Button --><!--
-                                        <Label Text="{Binding Quantity}" WidthRequest="10" Margin="0, 15" Grid.Column="1"/>-->
-                                        
-                                        <!--<Label Text="{Binding Quantity}" WidthRequest="10" HorizontalTextAlignment="Center" Grid.Column="1"/>-->
-                                        <!-- Increment Button -->
-                                        <!--<Label Text="+" WidthRequest="10" Grid.Column="2"/>-->
-                                        <!--<Label Text="+" WidthRequest="50" Margin="0, 10" FontSize="Large" Grid.Column="0"/>-->
-                                        <!-- Add Button -->
-                                        <Button Text="Add" HorizontalOptions="Start" Grid.Column="0" WidthRequest="150" />
-                                    </Grid>
-                                </StackLayout>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                                <!-- Price and Availability -->
+                                <Grid RowDefinitions="Auto">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="{Binding Price, StringFormat='R{0:F2}'}"
+                                   FontSize="Medium" TextColor="#0698d5" FontAttributes="Bold"
+                                   Grid.Column="0"/>
+                                    <Label Text="Available"
+                                   FontSize="Small"
+                                   TextColor="#47A140"
+                                   Margin="20,0,0,0"
+                                           FontAttributes="Bold"
+                                           HorizontalOptions="End"
+                                   Grid.Column="1"/>
+                                </Grid>
 
-        </pullToRefresh:SfPullToRefresh.PullableContent>
-    </pullToRefresh:SfPullToRefresh>
+                                <!-- Quantity and Add Button -->
+                                <Grid RowDefinitions="Auto" ColumnSpacing="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Stroke="#ddd" StrokeThickness="1" Padding="0" HeightRequest="38" StrokeShape="RoundRectangle 4">
+                                        <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="0"   BackgroundColor="#fff">
+                                            <!-- Decrement Button -->
+                                            <Button Text="-" FontSize="Large" TextColor="#666" BackgroundColor="Transparent" HeightRequest="70" WidthRequest="40"  />
+                                            <!-- Quantity Display -->
+                                            <Label Text="{Binding Quantity}" FontSize="Medium" HorizontalOptions="Center" VerticalOptions="Center" />
+
+                                            <!-- Increment Button -->
+                                            <Button Text="+" FontSize="Large" TextColor="#666" BackgroundColor="Transparent" HeightRequest="70" WidthRequest="40"  />
+                                        </HorizontalStackLayout>
+                                    </Border>
+                                    
+                                    <!-- Decrement Button -->
+                                    <!--<Label Text="_" WidthRequest="20" Margin="0, 1" FontSize="Large" Grid.Column="0"/>
+                            -->
+                                    <!-- Quantity Label -->
+                                    <!-- Decrement Button -->
+                                    <!--
+                            <Label Text="{Binding Quantity}" WidthRequest="10" Margin="0, 15" Grid.Column="1"/>-->
+
+                                    <!--<Label Text="{Binding Quantity}" WidthRequest="10" HorizontalTextAlignment="Center" Grid.Column="1"/>-->
+                                    <!-- Increment Button -->
+                                    <!--<Label Text="+" WidthRequest="10" Grid.Column="2"/>-->
+                                    <!--<Label Text="+" WidthRequest="50" Margin="0, 10" FontSize="Large" Grid.Column="0"/>-->
+                                    <!-- Add Button -->
+                                    <Button Text="Add" FontSize="18" CornerRadius="28" HeightRequest="30" Padding="0" BackgroundColor="#0698d5" HorizontalOptions="End" Grid.Column="1" WidthRequest="100" />
+                                </Grid>
+                            </StackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
 
 </ContentPage>

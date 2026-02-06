@@ -7,4 +7,12 @@ public partial class Catalog : ContentPage
 		InitializeComponent();
         BindingContext = model;
     }
+
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (BindingContext is ProductsListPageModel vm && query.ContainsKey("categoryId"))
+        {
+            vm.LoadProductsData(query["categoryId"]?.ToString());
+        }
+    }
 }

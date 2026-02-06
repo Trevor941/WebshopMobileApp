@@ -4,10 +4,14 @@ namespace WebshopMobileApp
 {
     public partial class App : Application
     {
-        public App()
+        private readonly ProductRepository _productRepository;
+        private readonly ProductsListPageModel _model;
+        public App(ProductRepository productRepository, ProductsListPageModel model)
         {
             InitializeComponent();
             Application.Current.UserAppTheme = AppTheme.Light;
+            _productRepository = productRepository;
+            _model = model;
             //MainPage = new NavigationPage(new TabbedParentPage())
             //{
             //    // BarBackgroundColor = trevorGray
@@ -17,7 +21,7 @@ namespace WebshopMobileApp
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new AppShell());
+            return new Window(new AppShell(_productRepository, _model));
         }
     }
 }

@@ -52,6 +52,9 @@ namespace WebshopMobileApp
             builder.Services.AddTransient<TabbedParentPage>();
             builder.Services.AddTransient<LoginPageModel>();
             builder.Services.AddSingleton<IAppNavigationService, AppNavigationService>();
+            builder.Services.AddSingleton<AppShell>();
+            builder.Services.AddSingleton<App>();
+            builder.Services.AddTransient<Catalog>();
             return builder.Build();
         }
     }

@@ -16,6 +16,7 @@
     Shell.TabBarForegroundColor="#fff"
     Shell.TabBarUnselectedColor="#ddd"
     Shell.TabBarTitleColor="#fff"
+     Navigating="OnShellNavigating"
     >
 
 
@@ -23,7 +24,7 @@
     <ShellContent
       Title="Sign Out"
       Icon="{StaticResource IconDashboard}"
-      ContentTemplate="{DataTemplate pages:LoginPage}"
+      ContentTemplate="{DataTemplate pages:LoginPage}" 
       Route="login" />
     <!--<ShellContent
         Title="Dashboard"
@@ -35,6 +36,11 @@
      Icon="{StaticResource IconDashboard}"
      ContentTemplate="{DataTemplate pages:TestPage}"
      Route="test" />
+    <ShellContent
+        Title="Catalog 2"
+        Icon="{StaticResource IconDashboard}"
+        ContentTemplate="{DataTemplate pagestabbed:Catalog}" 
+        Route="catalog2" />
 
     <TabBar Title="Menu" Route="main">
         <Tab Title="Home" Icon="home.png">
