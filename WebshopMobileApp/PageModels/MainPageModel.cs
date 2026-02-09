@@ -42,6 +42,7 @@ namespace WebshopMobileApp.PageModels
             {
                 Console.WriteLine(ex.Message);
             }
+
             var localproducts = await _productRepository.GetProductsLocally();
             if (localproducts.Count > 0)
             {

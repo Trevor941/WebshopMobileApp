@@ -13,6 +13,7 @@ namespace WebshopMobileApp.PageModels
     public partial class ProductsListPageModel : ObservableObject
     {
         private readonly ProductRepository _productRepository;
+        private readonly CartRepository _cartRepository;
         [ObservableProperty]
         private List<ProductsWithQuantity> _products = [];
         [ObservableProperty]
@@ -27,6 +28,8 @@ namespace WebshopMobileApp.PageModels
         private List<ProductsWithQuantity> FilteredProducts = new List<ProductsWithQuantity>();
         private List<ProductsWithQuantity> UnFilteredProducts = new List<ProductsWithQuantity>();
         private string _parameterToPassBack;
+        private CancellationTokenSource _cts;
+
         public string ParameterToPassBack
         {
             get => _parameterToPassBack;
@@ -48,11 +51,73 @@ namespace WebshopMobileApp.PageModels
                 FilterProducts(_searchText); // call your filter logic here
             }
         }
+        private int _quantity;
 
-        public ProductsListPageModel(ProductRepository productRepository)
+        public int Quantity
+        {
+            get => _quantity;
+            set
+            {
+                _quantity = value;
+                OnPropertyChanged();
+            }
+        }
+        public ProductsListPageModel(ProductRepository productRepository, CartRepository cartRepository)
         {
             _productRepository = productRepository;
+            _cartRepository = cartRepository;
         }
+        
+        [RelayCommand]
+        public async void AddToCart(ProductsWithQuantity product)
+        {
+            try
+            {
+                await _cartRepository.CreateTableCart();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            if (product != null)
+            {
+                var cart = new CartModel();
+                
+                    cart.ProductServerId = product.ProductServerId;
+                    cart.ProductCode = product.Code.Trim();
+                    cart.Quantity = product.Quantity;
+                    cart.Price = product.Price;
+                    cart.PriceIncl = product.PriceIncl;
+                    cart.HasImage = product.HasImage;
+                    cart.Description = product.Description.Trim();
+                    cart.UnitOfSale = product.UOM.Trim();
+                    cart.TaxPercentage = product.TaxPercentage;
+                    cart.TotalInc = 1;
+                    cart.lineTotal = 1;
+                    cart.NettPrice = 1;
+                    cart.VatTotal = 1;
+
+                    await _cartRepository.InsertCart(cart);
+                    product = new();
+                   var xyz = await _cartRepository.GetCartData();
+            }
+        }
+
+        [RelayCommand]
+        private void IncrementQuantity(ProductsWithQuantity product)
+        {
+            product.Quantity++;
+            Console.WriteLine($"clicked increment button, {product.Description}, quntity is {product.Quantity}");
+        }
+
+        [RelayCommand]
+        private void DecrementQuantity(ProductsWithQuantity product)
+        {
+            Console.WriteLine($"clicked decrement button, , {product.Description}, quntity is {product.Quantity}");
+            if (product.Quantity > 1)
+                product.Quantity--;
+        }
+
 
         [RelayCommand]
         private async Task LoadItems()
@@ -140,29 +205,34 @@ namespace WebshopMobileApp.PageModels
 
         private void FilterProducts(string searchText)
         {
+            _cts?.Cancel();
+            _cts = new CancellationTokenSource();
+            var token = _cts.Token;
             var productsvar = UnFilteredProducts;
             if (string.IsNullOrWhiteSpace(searchText))
             {
-                //FilteredProducts.Clear();
-                //foreach (var p in Products)
-                //    FilteredProducts.Add(p);
-                //return;
                 Products = UnFilteredProducts;
                 return;
             }
 
-            if(searchText.Length >= 4)
+            try
             {
-                var results = Products.Where(p =>
-                p.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                ||
-               p.Code.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+                if (searchText.Length >= 4)
+                {
+                    Task.Delay(300, token);
+                    var results = Products.Where(p =>
+                    p.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+                    ||
+                   p.Code.Contains(searchText, StringComparison.OrdinalIgnoreCase));
                     Products = results.ToList();
+                }
             }
+            catch (TaskCanceledException)
+            {
+                // Ignore cancellation
+            }
+           
         
-            //FilteredProducts.Clear();
-            //foreach (var item in results)
-            //    FilteredProducts.Add(item);
         }
     }
 }

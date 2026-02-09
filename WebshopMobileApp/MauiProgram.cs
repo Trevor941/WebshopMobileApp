@@ -45,6 +45,7 @@ namespace WebshopMobileApp
             builder.Services.AddSingleton<ProductsListPageModel>();
             builder.Services.AddSingleton<LoginRepository>();
             builder.Services.AddSingleton<ProductRepository>();
+            builder.Services.AddSingleton<CartRepository>();
             //builder.Services.AddTransientWithShellRoute<ProjectDetailPage, ProjectDetailPageModel>("project");
             //builder.Services.AddTransientWithShellRoute<TaskDetailPage, TaskDetailPageModel>("task");
             builder.Services.AddTransient<MainPage>();

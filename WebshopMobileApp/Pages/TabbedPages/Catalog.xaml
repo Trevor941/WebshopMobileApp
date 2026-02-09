@@ -7,7 +7,9 @@
              xmlns:pullToRefresh="clr-namespace:Syncfusion.Maui.Toolkit.PullToRefresh;assembly=Syncfusion.Maui.Toolkit"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="WebshopMobileApp.Pages.TabbedPages.Catalog"
+             
              x:DataType="pageModels:ProductsListPageModel"
+             xmlns:local="clr-namespace:WebshopMobileApp"
              Title="">
 
     <ContentPage.Behaviors>
@@ -117,13 +119,12 @@
                                     </Grid.ColumnDefinitions>
                                     <Border Stroke="#ddd" StrokeThickness="1" Padding="0" HeightRequest="38" StrokeShape="RoundRectangle 4">
                                         <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="0"   BackgroundColor="#fff">
-                                            <!-- Decrement Button -->
-                                            <Button Text="-" FontSize="Large" TextColor="#666" BackgroundColor="Transparent" HeightRequest="70" WidthRequest="40"  />
-                                            <!-- Quantity Display -->
+                                            <Button Text="-" FontSize="Large"   Command="{Binding x:DataType='pageModels:ProductsListPageModel', Source={RelativeSource AncestorType={x:Type pageModels:ProductsListPageModel}}, Path=DecrementQuantityCommand}"
+                                              CommandParameter="{Binding}" TextColor="#666" BackgroundColor="Transparent" HeightRequest="70" WidthRequest="40"  />
                                             <Label Text="{Binding Quantity}" FontSize="Medium" HorizontalOptions="Center" VerticalOptions="Center" />
 
-                                            <!-- Increment Button -->
-                                            <Button Text="+" FontSize="Large" TextColor="#666" BackgroundColor="Transparent" HeightRequest="70" WidthRequest="40"  />
+                                            <Button Text="+" FontSize="Large"  Command="{Binding x:DataType='pageModels:ProductsListPageModel', Source={RelativeSource AncestorType={x:Type pageModels:ProductsListPageModel}}, Path=IncrementQuantityCommand}"
+                                            CommandParameter="{Binding}" TextColor="#666" BackgroundColor="Transparent" HeightRequest="70" WidthRequest="40"  />
                                         </HorizontalStackLayout>
                                     </Border>
                                     
@@ -140,7 +141,8 @@
                                     <!--<Label Text="+" WidthRequest="10" Grid.Column="2"/>-->
                                     <!--<Label Text="+" WidthRequest="50" Margin="0, 10" FontSize="Large" Grid.Column="0"/>-->
                                     <!-- Add Button -->
-                                    <Button Text="Add" FontSize="18" CornerRadius="28" HeightRequest="30" Padding="0" BackgroundColor="#0698d5" HorizontalOptions="End" Grid.Column="1" WidthRequest="100" />
+                                    <Button Text="Add" FontSize="18" CornerRadius="28" Command="{Binding x:DataType='pageModels:ProductsListPageModel', Source={RelativeSource AncestorType={x:Type pageModels:ProductsListPageModel}}, Path=AddToCartCommand}"
+                                    CommandParameter="{Binding}"  HeightRequest="30" Padding="0" BackgroundColor="#0698d5" HorizontalOptions="End" Grid.Column="1" WidthRequest="100" />
                                 </Grid>
                             </StackLayout>
                         </Grid>

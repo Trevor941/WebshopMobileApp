@@ -1,0 +1,27 @@
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace WebshopMobileApp.Models
+{
+    public class CartModel
+    {
+        [Key]
+        public int Id { get; set; }
+        public int? ProductServerId { get; set; }
+        public string ProductCode { get; set; } = "";
+        public int Quantity { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? Price { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal PriceIncl { get; set; }
+
+        public bool HasImage { get; set; } = false;
+        public string Description { get; set; } = "";
+        public string UnitOfSale { get; set; } = "";
+        public decimal TaxPercentage { get; set; }
+        public decimal TotalInc { get; set; } = 0;
+        public decimal lineTotal { get; set; } = 0;
+        public decimal NettPrice { get; set; } = 0;
+        public decimal VatTotal { get; set; } = 0;
+    }
+}

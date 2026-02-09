@@ -14,6 +14,7 @@ namespace WebshopMobileApp.Models
         public int Id { get; set; }
         public string Code { get; set; } = "";
         public string Description { get; set; } = "";
+        public string UnitofSale1 { get; set; } = "";
         public decimal QuantityOnHand { get; set; } = 0;
         public bool HasImage { get; set; } = false;
         public byte[]? Image { get; set; }
@@ -30,7 +31,7 @@ namespace WebshopMobileApp.Models
         public decimal? TypicalOrderQuantity { get; set; }
         public decimal TaxPercentage { get; set; }
 
-        public string? UOM { get; set; }
+        public string UOM { get; set; } = "";
 
         public string? Category1 { get; set; }
         public string? Category2 { get; set; }
