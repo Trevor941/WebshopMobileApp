@@ -100,6 +100,7 @@ namespace WebshopMobileApp.PageModels
                     await _cartRepository.InsertCart(cart);
                     product = new();
                    var xyz = await _cartRepository.GetCartData();
+                 ((AppShell)Shell.Current).UpdateCartCount(xyz.Count);
             }
         }
 

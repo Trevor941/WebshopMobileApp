@@ -7,15 +7,16 @@ namespace WebshopMobileApp.Models
     {
         [Key]
         public int Id { get; set; }
-        public int? ProductServerId { get; set; }
-        public string ProductCode { get; set; } = "";
-        public int Quantity { get; set; }
+        public int ProductServerId { get; set; }
+        public string? ProductCode { get; set; } = "";
+        public int Quantity { get; set; } = 1;
         [Column(TypeName = "decimal(18,2)")]
         public decimal? Price { get; set; }
         [Column(TypeName = "decimal(18,2)")]
-        public decimal PriceIncl { get; set; }
+        public decimal? PriceIncl { get; set; }
 
         public bool HasImage { get; set; } = false;
+        public string FileUrl { get; set; } = "";
         public string Description { get; set; } = "";
         public string UnitOfSale { get; set; } = "";
         public decimal TaxPercentage { get; set; }

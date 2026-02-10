@@ -41,6 +41,11 @@
         Icon="{StaticResource IconDashboard}"
         ContentTemplate="{DataTemplate pagestabbed:Catalog}" 
         Route="catalog2" />
+    <ShellContent
+     Title="My Cart"
+     Icon="{StaticResource IconDashboard}"
+     ContentTemplate="{DataTemplate pages:MyCart}" 
+     Route="mycart" />
 
     <TabBar Title="Menu" Route="main">
         <Tab Title="Home" Icon="home.png">
@@ -57,23 +62,65 @@
         </Tab>
     </TabBar>
     <Shell.TitleView>
-        <Grid WidthRequest="190" HeightRequest="100" Padding="0,12,0,0" VerticalOptions="Center">
-            <Image
-                Source="lumarlogo.png"
-                Aspect="AspectFit"
-                VerticalOptions="Fill"
-                HorizontalOptions="Center" />
+        <Grid Padding="0,12,10,0"
+          ColumnDefinitions="*,Auto"
+          VerticalOptions="Center">
+
+            <!-- Logo -->
+            <Image Grid.Column="0"
+               Source="lumarlogo.png"
+               Aspect="AspectFit"
+               HeightRequest="90"
+               HorizontalOptions="Center" />
+
+            <!-- Cart with badge -->
+            <Grid Grid.Column="1"
+              Margin="10,0,0,0"
+              VerticalOptions="Center">
+
+                <Image Source="cart1.png"
+                   HeightRequest="26"
+                   WidthRequest="26">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnCartClicked"/>
+                    </Image.GestureRecognizers>
+                </Image>
+
+                <!-- Badge -->
+                <Frame x:Name="CartBadge"
+                   BackgroundColor="Red"
+                   CornerRadius="10"
+                   Padding="2"
+                   HeightRequest="18"
+                   WidthRequest="18"
+                   HorizontalOptions="End"
+                   VerticalOptions="Start"
+                   TranslationX="8"
+                   TranslationY="-6"
+                   IsVisible="False">
+
+                    <Label x:Name="CartCountLabel"
+                       Text="0"
+                       FontSize="11"
+                       TextColor="White"
+                       HorizontalTextAlignment="Center"
+                       VerticalTextAlignment="Center"/>
+                </Frame>
+            </Grid>
+
         </Grid>
     </Shell.TitleView>
-    <Shell.ToolbarItems>
+
+    <!--<Shell.ToolbarItems>
         <ToolbarItem
         IconImageSource="cart1.png"
         Text="Cart"
         Order="Primary"
         Priority="0"
+        Clicked="OnCartClicked"
         />
        
-    </Shell.ToolbarItems>
+    </Shell.ToolbarItems>-->
 
     <Shell.FlyoutFooter>
         <Grid Padding="15">

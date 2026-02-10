@@ -7,16 +7,20 @@ namespace WebshopMobileApp
 {
     public partial class AppShell : Shell
     {
+        private int _cartItemCount = 0;
         private readonly ProductRepository _productRepository;
+        private readonly CartRepository _cardRepository;
         private readonly ProductsListPageModel _model;
-        public AppShell(ProductRepository productRepository, ProductsListPageModel model)
+        public AppShell(ProductRepository productRepository, ProductsListPageModel model, CartRepository cardRepository)
         {
             InitializeComponent();
+            UpdateCartCount(0);
             var currentTheme = Application.Current!.RequestedTheme;
             ThemeSegmentedControl.SelectedIndex = currentTheme == AppTheme.Light ? 0 : 1;
             _productRepository = productRepository;
             _model = model;
-          //  LoadCategories();
+            _cardRepository = cardRepository;
+            GetCartItems();
         }
         public static async Task DisplaySnackbarAsync(string message)
         {
@@ -36,7 +40,29 @@ namespace WebshopMobileApp
 
             await snackbar.Show(cancellationTokenSource.Token);
         }
+        private async Task GetCartItems()
+        {
+            try
+            {
+                var Cart = await _cardRepository.GetCartData();
+                if (Cart.Count > 0)
+                {
+                     UpdateCartCount(Cart.Count);
+                }
 
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+        public void UpdateCartCount(int count)
+        {
+            _cartItemCount = count;
+
+            CartCountLabel.Text = count.ToString();
+            CartBadge.IsVisible = count > 0;
+        }
         public static async Task DisplayToastAsync(string message)
         {
             // Toast is currently not working in MCT on Windows
@@ -61,6 +87,11 @@ namespace WebshopMobileApp
                 e.Cancel(); // stop normal navigation
                 await Shell.Current.GoToAsync("//catalog?categoryId=6");
             }
+        }
+
+        private async void OnCartClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("//mycart");
         }
 
         //public async void LoadCategories()
@@ -98,6 +129,6 @@ namespace WebshopMobileApp
         //    }
         //}
 
-        
+
     }
 }

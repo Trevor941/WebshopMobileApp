@@ -49,9 +49,73 @@ namespace WebshopMobileApp.Data
                    
                 });
             }
-
             return products;
         }
+
+        public async Task<int> CheckProductExist(int ProductServerId)
+        {
+            await using var connection = new SqliteConnection(Constants.DatabasePath);
+            await connection.OpenAsync();
+
+            var selectCmd = connection.CreateCommand();
+            selectCmd.CommandText = $"SELECT ProductServerId FROM Cart where ProductServerId = {ProductServerId}";
+            var products = new List<CartModel>();
+
+            await using var reader = await selectCmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                products.Add(new CartModel
+                {
+                    ProductServerId = reader.GetInt32(0),
+                    //ProductServerId = reader.GetInt32(1),
+                    //ProductCode = reader.GetString(2),
+                    //Quantity = reader.GetInt32(3),
+                    //Price = reader.IsDBNull(4) ? null : reader.GetDecimal(4),
+                    //PriceIncl = reader.GetDecimal(5),
+                    //HasImage = reader.GetBoolean(6),
+                    //Description = reader.GetString(7),
+                    //UnitOfSale = reader.GetString(8),
+                    //TaxPercentage = reader.GetDecimal(9),
+                    //TotalInc = reader.GetDecimal(10),
+                    //lineTotal = reader.GetDecimal(11),
+                    //NettPrice = reader.GetDecimal(12),
+                    //VatTotal = reader.GetDecimal(13),
+
+                });
+            }
+            if(products.Count > 0)
+            {
+               var product = products.FirstOrDefault();
+                if (product != null)
+                {
+                    return ProductServerId;
+                }
+            }
+            return 0;
+        }
+
+        public async Task DeleteCartItem(int ProductServerId)
+        {
+
+            await using var connection = new SqliteConnection(Constants.DatabasePath);
+            await connection.OpenAsync();
+
+            try
+            {
+                var createTableCmd = connection.CreateCommand();
+                createTableCmd.CommandText = @$"Delete From Cart where ProductServerId = {ProductServerId}";
+                         
+                   
+                await createTableCmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message + "Error Delete From Cart table");
+                throw;
+            }
+
+        }
+
         public async Task CreateTableCart()
         {
 
@@ -62,10 +126,10 @@ namespace WebshopMobileApp.Data
             {
                 var createTableCmd = connection.CreateCommand();
                 createTableCmd.CommandText = @"
-                          
+                         
                                   CREATE TABLE Cart (
                             Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            ProductServerId INTEGER NOT NULL,
+                            ProductServerId INTEGER NOT NULL UNIQUE,
                             ProductCode TEXT NOT NULL,
                             Quantity INTEGER NOT NULL,
                             Price NUMERIC NOT NULL,
@@ -80,7 +144,6 @@ namespace WebshopMobileApp.Data
                             VatTotal NUMERIC NOT NULL DEFAULT 0
                         );
                     ";
-
                 await createTableCmd.ExecuteNonQueryAsync();
             }
             catch (Exception e)
@@ -96,7 +159,11 @@ namespace WebshopMobileApp.Data
             await using var connection = new SqliteConnection(Constants.DatabasePath);
             await connection.OpenAsync();
             var insertCommand = connection.CreateCommand();
-            insertCommand.CommandText = @"
+
+            var productServerId = await CheckProductExist(cartModel.ProductServerId);
+            if (productServerId == 0)
+            {
+                insertCommand.CommandText = @"
                     
                     INSERT INTO Cart (
                         ProductServerId,
@@ -129,6 +196,21 @@ namespace WebshopMobileApp.Data
                         @VatTotal
                     );
                 ";
+            }
+            else
+            {
+                insertCommand.CommandText = @"
+                    
+                    Update Cart SET
+                        Quantity = @Quantity,
+                        TotalInc = @TotalInc,
+                        lineTotal = @lineTotal,
+                        NettPrice = @NettPrice,
+                        VatTotal = @VatTotal
+                        Where ProductServerId = @ProductServerId
+                ";
+            }
+           
 
             insertCommand.Parameters.AddWithValue("@ProductServerId", DbType.Int32).Value = cartModel.ProductServerId;
             insertCommand.Parameters.AddWithValue("@ProductCode", DbType.String).Value = cartModel.ProductCode;

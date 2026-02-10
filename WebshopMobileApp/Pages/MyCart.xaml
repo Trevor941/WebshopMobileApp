@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pageModels="clr-namespace:WebshopMobileApp.PageModels"
+             xmlns:models="clr-namespace:WebshopMobileApp.Models"
+             x:Class="WebshopMobileApp.Pages.MyCart"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:DataType="pageModels:MyCartPageModel"
+             Title="MyCart">
+
+
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior
+            EventName="Appearing"
+            Command="{Binding LoadCartItemsCommand}" />
+    </ContentPage.Behaviors>
+
+
+
+    <VerticalStackLayout Spacing="0" Padding="0, 0, 0 ,0">
+        <Border
+            BackgroundColor="#ffffff"
+            Stroke="#0698d5"
+            StrokeThickness="0"
+            Padding="18">
+
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="0" />
+            </Border.StrokeShape>
+                <!-- Search Entry -->
+                <Label
+                 Text="My Cart"
+                Grid.Column="1"
+                FontAttributes="Bold"
+                FontSize="28"
+                TextColor="#000"
+                VerticalOptions="Center">
+                </Label>
+            </Border>
+
+        <CollectionView x:Name="CartCollectionView"
+        ItemsSource="{Binding Cart}"
+        Margin="10"  HeightRequest="350" BackgroundColor="#0698d5">
+            <CollectionView.ItemTemplate>
+                <DataTemplate  x:DataType="models:CartModel">
+                    <Border Stroke="#fff" BackgroundColor="blue"
+            StrokeThickness="0" 
+            Padding="10" 
+                    StrokeShape="RoundRectangle 1"
+            Margin="5" Background="#ddd">
+                        <Grid ColumnDefinitions="*,3*" RowDefinitions="Auto,Auto,Auto"  >
+                            <!-- Product Image -->
+                            <Border Stroke="Black" StrokeThickness="0" Padding="0"  StrokeShape="RoundRectangle 8">
+                                <Image Grid.Column="0"
+                            Source="{Binding FileUrl}"
+                            Aspect="AspectFill"
+                                    HeightRequest="100"
+                                    BackgroundColor="#0698d5"
+                            Margin="0"/>
+
+                            </Border>
+
+                            <StackLayout Grid.Column="1" Margin="10,0,0,0" Spacing="5">
+                                <Label Text="{Binding Description}" FontSize="18" FontAttributes="Bold" TextColor="#666"/>
+                                <Label Text="{Binding UnitOfSale}" FontSize="Small" TextColor="#0698d5"/>
+                                <Label Text="{Binding Price, StringFormat='R{0:F2}'}"
+                                FontSize="Large" TextColor="#000" FontAttributes="Bold"
+                                />
+                            </StackLayout>
+                            <Image Grid.Column="2"
+                               Source="delete.png"
+                               Aspect="AspectFit"
+                                      HeightRequest="30"
+                                      HorizontalOptions="End"
+                               Margin="0">
+                            <Image.GestureRecognizers>
+                                <TapGestureRecognizer 
+                                    Command="{Binding x:DataType='pageModels:MyCartPageModel', Source={RelativeSource AncestorType={x:Type pageModels:MyCartPageModel}}, Path=DeleteCartItemCommand}"
+                                    CommandParameter="{Binding}" />
+                            </Image.GestureRecognizers>
+                            </Image>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentPage>

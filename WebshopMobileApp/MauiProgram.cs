@@ -43,6 +43,7 @@ namespace WebshopMobileApp
            
             builder.Services.AddSingleton<MainPageModel>();
             builder.Services.AddSingleton<ProductsListPageModel>();
+            builder.Services.AddSingleton<MyCartPageModel>();
             builder.Services.AddSingleton<LoginRepository>();
             builder.Services.AddSingleton<ProductRepository>();
             builder.Services.AddSingleton<CartRepository>();
