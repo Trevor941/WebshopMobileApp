@@ -97,6 +97,55 @@ namespace WebshopMobileApp.Data
             return products;
         }
 
+        public async Task<List<ProductsWithQuantity>> GetProductsLocallyByCategory(int CategoryId)
+        {
+            await using var connection = new SqliteConnection(Constants.DatabasePath);
+            await connection.OpenAsync();
+
+            var selectCmd = connection.CreateCommand();
+            selectCmd.CommandText = $"SELECT * FROM Products where CategoryId = {CategoryId}";
+            var products = new List<ProductsWithQuantity>();
+
+            await using var reader = await selectCmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                products.Add(new ProductsWithQuantity
+                {
+                    Id = reader.GetInt32(0),
+                    Code = reader.GetString(1),
+                    Description = reader.GetString(2),
+                    QuantityOnHand = reader.GetDecimal(3),
+                    HasImage = reader.GetBoolean(4),
+                    Image = reader.IsDBNull(5) ? null : (byte[])reader[5],
+                    Price = reader.IsDBNull(6) ? null : reader.GetDecimal(6),
+                    PriceIncl = reader.GetDecimal(7),
+                    OnSpecial = reader.GetBoolean(8),
+                    SpecialPrice = reader.IsDBNull(9) ? null : reader.GetDecimal(9),
+                    TypicalOrderQuantity = reader.IsDBNull(10) ? null : reader.GetDecimal(10),
+                    TaxPercentage = reader.GetDecimal(11),
+                    UOM = reader.IsDBNull(12) ? null : reader.GetString(12),
+
+                    Category1 = reader.IsDBNull(13) ? null : reader.GetString(13),
+                    Category2 = reader.IsDBNull(14) ? null : reader.GetString(14),
+                    Category3 = reader.IsDBNull(15) ? null : reader.GetString(15),
+                    Category4 = reader.IsDBNull(16) ? null : reader.GetString(16),
+                    Category5 = reader.IsDBNull(17) ? null : reader.GetString(17),
+                    Category6 = reader.IsDBNull(18) ? null : reader.GetString(18),
+                    Category7 = reader.IsDBNull(19) ? null : reader.GetString(19),
+                    Category8 = reader.IsDBNull(20) ? null : reader.GetString(20),
+
+                    isFavoured = reader.GetBoolean(21),
+                    InfoApproved = reader.GetBoolean(22),
+                    CategoryId = reader.GetInt32(23),
+                    Category = reader.GetString(24),
+                    Quantity = reader.GetInt32(25),
+                    IsPromoted = reader.GetBoolean(26),
+                    ProductServerId = reader.GetInt32(27),
+                });
+            }
+
+            return products;
+        }
         public async Task<List<TblPromoPicturesSet>> GetSlotsFromAPICall()
         {
             string token = Preferences.Default.Get("token", "null");

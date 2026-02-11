@@ -41,14 +41,14 @@
 
         <CollectionView x:Name="CartCollectionView"
         ItemsSource="{Binding Cart}"
-        Margin="10"  HeightRequest="350" BackgroundColor="#0698d5">
+        Margin="10"  HeightRequest="450" BackgroundColor="#0698d5">
             <CollectionView.ItemTemplate>
                 <DataTemplate  x:DataType="models:CartModel">
                     <Border Stroke="#fff" BackgroundColor="blue"
             StrokeThickness="0" 
             Padding="10" 
                     StrokeShape="RoundRectangle 1"
-            Margin="5" Background="#ddd">
+            Margin="5" Background="#FFF">
                         <Grid ColumnDefinitions="*,3*" RowDefinitions="Auto,Auto,Auto"  >
                             <!-- Product Image -->
                             <Border Stroke="Black" StrokeThickness="0" Padding="0"  StrokeShape="RoundRectangle 8">
@@ -56,7 +56,7 @@
                             Source="{Binding FileUrl}"
                             Aspect="AspectFill"
                                     HeightRequest="100"
-                                    BackgroundColor="#0698d5"
+                                    BackgroundColor="#fFF"
                             Margin="0"/>
 
                             </Border>

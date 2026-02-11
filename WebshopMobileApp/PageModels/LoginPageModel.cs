@@ -19,7 +19,7 @@ namespace WebshopMobileApp.PageModels
         [ObservableProperty]
         private string _password = "123456"; //string.Empty;
         [ObservableProperty]
-        private bool _termsandconditions = false;
+        private bool _termsandconditions = true;
         
         public LoginPageModel(LoginRepository loginRepository, IAppNavigationService navigation)
         {

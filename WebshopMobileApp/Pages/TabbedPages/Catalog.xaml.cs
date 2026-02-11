@@ -12,7 +12,7 @@ public partial class Catalog : ContentPage
     {
         if (BindingContext is ProductsListPageModel vm && query.ContainsKey("categoryId"))
         {
-            vm.LoadProductsData(query["categoryId"]?.ToString());
+            vm.LoadProductsByCategory(query["categoryId"]?.ToString());
         }
     }
 }

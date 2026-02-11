@@ -9,8 +9,8 @@ using WebshopMobileApp.Models;
 
 namespace WebshopMobileApp.PageModels
 {
-    [QueryProperty(nameof(ParameterToPassBack), "categoryId")]
-    public partial class ProductsListPageModel : ObservableObject
+    //[QueryProperty(nameof(ParameterToPassBack), "categoryId")]
+    public partial class ProductsListPageModel : ObservableObject, IQueryAttributable
     {
         private readonly ProductRepository _productRepository;
         private readonly CartRepository _cartRepository;
@@ -29,16 +29,27 @@ namespace WebshopMobileApp.PageModels
         private List<ProductsWithQuantity> UnFilteredProducts = new List<ProductsWithQuantity>();
         private string _parameterToPassBack;
         private CancellationTokenSource _cts;
+        public string CategoryId { get; set; }
 
-        public string ParameterToPassBack
+        public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            get => _parameterToPassBack;
-            set
+            if (query.TryGetValue("categoryId", out var value))
             {
-                _parameterToPassBack = Uri.UnescapeDataString(value);
-                // handle the value here
+                CategoryId = value?.ToString();
+                // do your loading logic here
+                await LoadItems();
             }
         }
+        //public string ParameterToPassBack
+        //{
+        //    get => _parameterToPassBack;
+        //    set
+        //    {
+        //        _parameterToPassBack = Uri.UnescapeDataString(value);
+        //        OnPropertyChanged();
+        //        // handle the value here
+        //    }
+        //}
         public string SearchText
         {
             get => _searchText;
@@ -47,21 +58,11 @@ namespace WebshopMobileApp.PageModels
                 if (_searchText == value) return;
                 _searchText = value;
                 OnPropertyChanged();
-
+                Task.Delay(2000);
                 FilterProducts(_searchText); // call your filter logic here
             }
         }
-        private int _quantity;
-
-        public int Quantity
-        {
-            get => _quantity;
-            set
-            {
-                _quantity = value;
-                OnPropertyChanged();
-            }
-        }
+       
         public ProductsListPageModel(ProductRepository productRepository, CartRepository cartRepository)
         {
             _productRepository = productRepository;
@@ -120,32 +121,34 @@ namespace WebshopMobileApp.PageModels
         }
 
 
-        [RelayCommand]
+       // [RelayCommand]
         private async Task LoadItems()
         {
             SearchText = "";
-            await GetProducts();
-            //await GetSlots();
             ISVisibleSpinner = false;
-            DeliveryDate = "Delivery Date: " + DateTime.Now.AddDays(1).ToString("dd MMM yyyy");
-            if(ParameterToPassBack != null && ParameterToPassBack != "")
+           // DeliveryDate = "Delivery Date: " + DateTime.Now.AddDays(1).ToString("dd MMM yyyy");
+            if(CategoryId != null && CategoryId != "")
             {
-                if(ParameterToPassBack == "0")
+                if(CategoryId == "0")
                 {
                     return;
                 }
-                LoadProductsData(ParameterToPassBack);
+                await LoadProductsByCategory(CategoryId);
+                return;
             }
+            await GetProducts();
         }
 
-        public void LoadProductsData(string categoryId)
+        public async Task LoadProductsByCategory(string categoryId)
         {
             // Do whatever you need with the parameter
-            var SearchedProducts = UnFilteredProducts.Where(x => x.CategoryId.ToString() == categoryId).ToList();
-            if(SearchedProducts != null && SearchedProducts.Count > 0)
-            {
-                Products = SearchedProducts;
-            }
+            //var SearchedProducts = UnFilteredProducts.Where(x => x.CategoryId.ToString() == categoryId).ToList();
+            //if(SearchedProducts != null && SearchedProducts.Count > 0)
+            //{
+                UnFilteredProducts = await _productRepository.GetProductsLocallyByCategory(Int32.Parse(categoryId));
+                Products = UnFilteredProducts;
+                await ProductFileUrls();
+            //  }
             // Maybe load catalog items from API based on this ID
         }
         private async Task GetProducts()
@@ -206,21 +209,20 @@ namespace WebshopMobileApp.PageModels
 
         private void FilterProducts(string searchText)
         {
-            _cts?.Cancel();
-            _cts = new CancellationTokenSource();
-            var token = _cts.Token;
+            ISVisibleSpinner = true;
             var productsvar = UnFilteredProducts;
+            Products = UnFilteredProducts;
             if (string.IsNullOrWhiteSpace(searchText))
             {
                 Products = UnFilteredProducts;
+                ISVisibleSpinner = false;
                 return;
             }
 
             try
             {
-                if (searchText.Length >= 4)
+                if (searchText.Length >= 3)
                 {
-                    Task.Delay(300, token);
                     var results = Products.Where(p =>
                     p.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)
                     ||
@@ -232,8 +234,8 @@ namespace WebshopMobileApp.PageModels
             {
                 // Ignore cancellation
             }
-           
-        
+           ISVisibleSpinner = false;
+
         }
     }
 }

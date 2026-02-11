@@ -104,8 +104,13 @@
                                     HeightRequest="80"
                                     WidthRequest="100"
                                     HorizontalOptions="Center"
-                                    VerticalOptions="Center" />
-
+                                    VerticalOptions="Center">
+                            <Image.GestureRecognizers>
+                                <TapGestureRecognizer 
+                                 Command="{Binding x:DataType='pageModels:MainPageModel', Source={RelativeSource AncestorType={x:Type pageModels:MainPageModel}}, Path=GoToCatalogCommand}"
+                                 CommandParameter="{Binding CategoryId}" />
+                            </Image.GestureRecognizers>
+                            </Image>
 
                         </Border>
                     </DataTemplate>

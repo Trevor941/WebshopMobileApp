@@ -69,6 +69,15 @@ namespace WebshopMobileApp.PageModels
             Slots = await _productRepository.GetSlotsFromAPICall();
         }
 
+        [RelayCommand]
+        private async Task GoToCatalog(int CategoryId)
+        {
+            if(CategoryId > 0)
+            {
+                await Shell.Current.GoToAsync($"//catalog?categoryId={CategoryId}");
+            }
+        }
+
 
         private async Task GetCategories()
         {

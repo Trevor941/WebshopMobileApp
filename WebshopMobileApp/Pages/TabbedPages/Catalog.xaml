@@ -12,11 +12,11 @@
              xmlns:local="clr-namespace:WebshopMobileApp"
              Title="">
 
-    <ContentPage.Behaviors>
-        <toolkit:EventToCommandBehavior
-            EventName="Appearing"
+    <!--<ContentPage.Behaviors>
+            <toolkit:EventToCommandBehavior
+            EventName="NavigatedTo"
             Command="{Binding LoadItemsCommand}" />
-    </ContentPage.Behaviors>
+    </ContentPage.Behaviors>-->
 
  
 
@@ -51,6 +51,7 @@
                 PlaceholderColor="#666"
                 FontSize="14"
                 TextColor="#666"
+                ClearButtonVisibility="WhileEditing"
                 VerticalOptions="Center">
 
                     <!--<Entry.Behaviors>
