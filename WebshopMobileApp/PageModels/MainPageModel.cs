@@ -8,8 +8,6 @@ namespace WebshopMobileApp.PageModels
     {
         private readonly ProductRepository _productRepository;
         [ObservableProperty]
-        private List<ProductsWithQuantity> _products = [];
-        [ObservableProperty]
         private List<TblPromoPicturesSet> _slots = [];
         [ObservableProperty]
         private List<Category> _categories = [];
@@ -36,28 +34,15 @@ namespace WebshopMobileApp.PageModels
         {
             try
             {
-                await _productRepository.CreateTableProductsLocally();
+               // await _productRepository.GetProductsFromAPICall();
+                await GetCategories();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-            }
-
-            var localproducts = await _productRepository.GetProductsLocally();
-            if (localproducts.Count > 0)
-            {
-                Products = localproducts;
-                await GetCategories();
-            }
-            else
-            {
-                Products = await _productRepository.GetProductsFromAPICall();
-                if (Products.Count > 0)
+              var getit =  await _productRepository.GetProductsFromAPICall();
+                if(getit == true)
                 {
-                    foreach (var product in Products)
-                    {
-                        await _productRepository.InsertProduct(product);
-                    }
                     await GetCategories();
                 }
             }
@@ -81,17 +66,7 @@ namespace WebshopMobileApp.PageModels
 
         private async Task GetCategories()
         {
-            var cati = Products.Where(p => !string.IsNullOrEmpty(p.Category))
-              .GroupBy(p => new { p.CategoryId, p.Category })
-              .Select(g => (g.Key.CategoryId, g.Key.Category)).OrderBy(x => x.Category).ToList();
-            foreach (var cat in cati)
-            {
-                var realcat = new Category();
-                realcat.CategoryId = cat.CategoryId;
-                realcat.CategoryName = cat.Category;
-                realcat.FileUrl = "https://orders.lumarfoods.co.za:20603/categories/" + cat.CategoryId + ".png";
-                Categories.Add(realcat);    
-            }
+            Categories = await _productRepository.GetCategoriesLocally();
         }
     }
 

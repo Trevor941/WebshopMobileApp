@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
+using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Logging;
-using RestSharp;
 using WebshopMobileApp.Models;
 
 namespace WebshopMobileApp.Data
@@ -14,23 +14,26 @@ namespace WebshopMobileApp.Data
     public class ProductRepository
     {
         private readonly ILogger _logger;
-        public ProductRepository(ILogger<ProductsWithQuantity> logger)
+        public string API_URL = Constants.API_URL;
+        private readonly CartRepository cartRepository;
+        public ProductRepository(ILogger<ProductsWithQuantity> logger, CartRepository cartRepository)
         {
             _logger = logger;
+            this.cartRepository = cartRepository;
         }
-        public async Task<List<ProductsWithQuantity>> GetProductsFromAPICall()
+        public async Task<bool> GetProductsFromAPICall()
         {
             string token = Preferences.Default.Get("token", "null");
             int customerId = Preferences.Default.Get("customerId", 0);
 
-            var options = new RestClientOptions("https://orders.lumarfoods.co.za:20603")
+            var options = new RestClientOptions(API_URL)
             {
                 // MaxTimeout = -1,
             };
             var client = new RestClient(options);
             if(customerId == 0)
             {
-                return new List<ProductsWithQuantity>();
+                return false;
             }
             var deliveryDate = DateTime.Now.ToString("yyyy-MM-dd");
             var request = new RestRequest($"/api/Products/GetAllProducts?CustomerID={customerId}&Deliverydate={deliveryDate}", Method.Get);
@@ -38,14 +41,79 @@ namespace WebshopMobileApp.Data
             Console.WriteLine(response.Content);
             if (response.Content != null)
             {
-                var userResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ProductsWithQuantity>>(response.Content);
-                if (userResponse != null)
+                var products = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ProductsWithQuantity>>(response.Content);
+                if (products != null)
                 {
-                    return userResponse; //.Take(5).ToList();
+                    if (products.Count > 0)
+                    {
+                        await CreateTableProductsLocally();
+                        foreach (var product in products)
+                        {
+                            await InsertProduct(product);
+                        }
+                        await ProductFileUrls(products);
+                        var cati = products.Where(p => !string.IsNullOrEmpty(p.Category))
+                                    .GroupBy(p => new { p.CategoryId, p.Category })
+                                    .Select(g => (g.Key.CategoryId, g.Key.Category)).OrderBy(x => x.Category).ToList();
+                        if(cati.Count > 0)
+                        {
+                            await CreateTableCategoriesLocally();
+                            foreach (var cat in cati)
+                            {
+                                var realcat = new Category();
+                                realcat.CategoryId = cat.CategoryId;
+                                realcat.CategoryName = cat.Category;
+                                realcat.FileUrl = Constants.API_URL + "/categories/" + cat.CategoryId + ".png";
+                                await InsertCategory(realcat);
+                            }
+                        }
+                    }
+                    return true; //.Take(5).ToList();
                 }
             }
-            return new List<ProductsWithQuantity>();
+            return false;
         }
+
+        private async Task ProductFileUrls(List<ProductsWithQuantity> products)
+        {
+            foreach (var x in products)
+            {
+                x.ProductServerId = x.Id;
+                if (x.HasImage)
+                {
+                    x.FileUrl = $"{API_URL}/images/" + x.ProductServerId + ".png";
+                }
+                else
+                {
+                    x.FileUrl = $"{API_URL}/images/300px-no_image_available.svg.png";
+                }
+            }
+        }
+
+        public async Task<List<Category>> GetCategoriesLocally()
+        {
+            await using var connection = new SqliteConnection(Constants.DatabasePath);
+            await connection.OpenAsync();
+
+            var selectCmd = connection.CreateCommand();
+            selectCmd.CommandText = "SELECT * FROM Categories";
+            var products = new List<Category>();
+
+            await using var reader = await selectCmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                products.Add(new Category
+                {
+                    Id = reader.GetInt32(0),
+                    CategoryId = reader.GetInt32(1),
+                    CategoryName = reader.GetString(2),
+                    FileUrl = reader.GetString(3)
+                });
+            }
+
+            return products;
+        }
+
 
         public async Task<List<ProductsWithQuantity>> GetProductsLocally()
         {
@@ -53,7 +121,7 @@ namespace WebshopMobileApp.Data
             await connection.OpenAsync();
 
             var selectCmd = connection.CreateCommand();
-            selectCmd.CommandText = "SELECT * FROM Products";
+            selectCmd.CommandText = "SELECT * FROM Products LIMIT 30";
             var products = new List<ProductsWithQuantity>();
 
             await using var reader = await selectCmd.ExecuteReaderAsync();
@@ -67,7 +135,7 @@ namespace WebshopMobileApp.Data
                     QuantityOnHand = reader.GetDecimal(3),
                     HasImage = reader.GetBoolean(4),
                     Image = reader.IsDBNull(5) ? null : (byte[])reader[5],
-                    Price = reader.IsDBNull(6) ? null : reader.GetDecimal(6),
+                    Price = reader.GetDecimal(6),
                     PriceIncl = reader.GetDecimal(7),
                     OnSpecial = reader.GetBoolean(8),
                     SpecialPrice = reader.IsDBNull(9) ? null : reader.GetDecimal(9),
@@ -91,19 +159,19 @@ namespace WebshopMobileApp.Data
                     Quantity = reader.GetInt32(25),
                     IsPromoted = reader.GetBoolean(26),
                     ProductServerId = reader.GetInt32(27),
+                    FileUrl = reader.GetString(28)
                 });
             }
 
             return products;
         }
-
-        public async Task<List<ProductsWithQuantity>> GetProductsLocallyByCategory(int CategoryId)
+        public async Task<List<ProductsWithQuantity>> GetRecommendedProducts()
         {
             await using var connection = new SqliteConnection(Constants.DatabasePath);
             await connection.OpenAsync();
 
             var selectCmd = connection.CreateCommand();
-            selectCmd.CommandText = $"SELECT * FROM Products where CategoryId = {CategoryId}";
+            selectCmd.CommandText = "SELECT * FROM Products limit 15";
             var products = new List<ProductsWithQuantity>();
 
             await using var reader = await selectCmd.ExecuteReaderAsync();
@@ -117,7 +185,7 @@ namespace WebshopMobileApp.Data
                     QuantityOnHand = reader.GetDecimal(3),
                     HasImage = reader.GetBoolean(4),
                     Image = reader.IsDBNull(5) ? null : (byte[])reader[5],
-                    Price = reader.IsDBNull(6) ? null : reader.GetDecimal(6),
+                    Price = reader.GetDecimal(6),
                     PriceIncl = reader.GetDecimal(7),
                     OnSpecial = reader.GetBoolean(8),
                     SpecialPrice = reader.IsDBNull(9) ? null : reader.GetDecimal(9),
@@ -141,6 +209,107 @@ namespace WebshopMobileApp.Data
                     Quantity = reader.GetInt32(25),
                     IsPromoted = reader.GetBoolean(26),
                     ProductServerId = reader.GetInt32(27),
+                    FileUrl = reader.GetString(28)
+                });
+            }
+
+            return products;
+        }
+        public async Task<List<ProductsWithQuantity>> GetProductsByCategory(int CategoryId)
+        {
+            await using var connection = new SqliteConnection(Constants.DatabasePath);
+            await connection.OpenAsync();
+
+            var selectCmd = connection.CreateCommand();
+            selectCmd.CommandText = $"SELECT * FROM Products where CategoryId = {CategoryId} limit 30";
+            var products = new List<ProductsWithQuantity>();
+
+            await using var reader = await selectCmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                products.Add(new ProductsWithQuantity
+                {
+                    Id = reader.GetInt32(0),
+                    Code = reader.GetString(1),
+                    Description = reader.GetString(2),
+                    QuantityOnHand = reader.GetDecimal(3),
+                    HasImage = reader.GetBoolean(4),
+                    Image = reader.IsDBNull(5) ? null : (byte[])reader[5],
+                    Price = reader.GetDecimal(6),
+                    PriceIncl = reader.GetDecimal(7),
+                    OnSpecial = reader.GetBoolean(8),
+                    SpecialPrice = reader.IsDBNull(9) ? null : reader.GetDecimal(9),
+                    TypicalOrderQuantity = reader.IsDBNull(10) ? null : reader.GetDecimal(10),
+                    TaxPercentage = reader.GetDecimal(11),
+                    UOM = reader.IsDBNull(12) ? null : reader.GetString(12),
+
+                    Category1 = reader.IsDBNull(13) ? null : reader.GetString(13),
+                    Category2 = reader.IsDBNull(14) ? null : reader.GetString(14),
+                    Category3 = reader.IsDBNull(15) ? null : reader.GetString(15),
+                    Category4 = reader.IsDBNull(16) ? null : reader.GetString(16),
+                    Category5 = reader.IsDBNull(17) ? null : reader.GetString(17),
+                    Category6 = reader.IsDBNull(18) ? null : reader.GetString(18),
+                    Category7 = reader.IsDBNull(19) ? null : reader.GetString(19),
+                    Category8 = reader.IsDBNull(20) ? null : reader.GetString(20),
+
+                    isFavoured = reader.GetBoolean(21),
+                    InfoApproved = reader.GetBoolean(22),
+                    CategoryId = reader.GetInt32(23),
+                    Category = reader.GetString(24),
+                    Quantity = reader.GetInt32(25),
+                    IsPromoted = reader.GetBoolean(26),
+                    ProductServerId = reader.GetInt32(27),
+                    FileUrl = reader.GetString(28)
+                });
+            }
+
+            return products;
+        }
+        public async Task<List<ProductsWithQuantity>> GetProductsBySearchWord(string SearchWord)
+        {
+            await using var connection = new SqliteConnection(Constants.DatabasePath);
+            await connection.OpenAsync();
+
+            var selectCmd = connection.CreateCommand();
+            selectCmd.CommandText = $"SELECT * FROM Products where Code like '%{SearchWord}%' or Description like '%{SearchWord}%' limit 30";
+            var products = new List<ProductsWithQuantity>();
+
+            await using var reader = await selectCmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                products.Add(new ProductsWithQuantity
+                {
+                    Id = reader.GetInt32(0),
+                    Code = reader.GetString(1),
+                    Description = reader.GetString(2),
+                    QuantityOnHand = reader.GetDecimal(3),
+                    HasImage = reader.GetBoolean(4),
+                    Image = reader.IsDBNull(5) ? null : (byte[])reader[5],
+                    Price = reader.GetDecimal(6),
+                    PriceIncl = reader.GetDecimal(7),
+                    OnSpecial = reader.GetBoolean(8),
+                    SpecialPrice = reader.IsDBNull(9) ? null : reader.GetDecimal(9),
+                    TypicalOrderQuantity = reader.IsDBNull(10) ? null : reader.GetDecimal(10),
+                    TaxPercentage = reader.GetDecimal(11),
+                    UOM = reader.IsDBNull(12) ? null : reader.GetString(12),
+
+                    Category1 = reader.IsDBNull(13) ? null : reader.GetString(13),
+                    Category2 = reader.IsDBNull(14) ? null : reader.GetString(14),
+                    Category3 = reader.IsDBNull(15) ? null : reader.GetString(15),
+                    Category4 = reader.IsDBNull(16) ? null : reader.GetString(16),
+                    Category5 = reader.IsDBNull(17) ? null : reader.GetString(17),
+                    Category6 = reader.IsDBNull(18) ? null : reader.GetString(18),
+                    Category7 = reader.IsDBNull(19) ? null : reader.GetString(19),
+                    Category8 = reader.IsDBNull(20) ? null : reader.GetString(20),
+
+                    isFavoured = reader.GetBoolean(21),
+                    InfoApproved = reader.GetBoolean(22),
+                    CategoryId = reader.GetInt32(23),
+                    Category = reader.GetString(24),
+                    Quantity = reader.GetInt32(25),
+                    IsPromoted = reader.GetBoolean(26),
+                    ProductServerId = reader.GetInt32(27),
+                    FileUrl = reader.GetString(28)
                 });
             }
 
@@ -151,7 +320,7 @@ namespace WebshopMobileApp.Data
             string token = Preferences.Default.Get("token", "null");
             int customerId = Preferences.Default.Get("customerId", 0);
 
-            var options = new RestClientOptions("https://orders.lumarfoods.co.za:20603")
+            var options = new RestClientOptions(API_URL)
             {
                 // MaxTimeout = -1,
             };
@@ -186,9 +355,8 @@ namespace WebshopMobileApp.Data
                 var createTableCmd = connection.CreateCommand();
                 createTableCmd.CommandText = @"
           
-                            
 
-           CREATE TABLE Products (
+               CREATE TABLE Products (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
 
                         Code TEXT NOT NULL,
@@ -225,7 +393,8 @@ namespace WebshopMobileApp.Data
                         Category TEXT NOT NULL,
                         Quantity INTEGER NOT NULL,
                        IsPromoted INTEGER NOT NULL,
-                         ProductServerId INTEGER NOT NULL
+                         ProductServerId INTEGER NOT NULL,
+                         FileUrl TEXT
                     );
                     ";
           
@@ -273,7 +442,8 @@ namespace WebshopMobileApp.Data
                         Category,
                         Quantity,
                        IsPromoted,
-                       ProductServerId
+                       ProductServerId,
+                       FileUrl
                     )
                     VALUES (
                         @Code,
@@ -302,7 +472,8 @@ namespace WebshopMobileApp.Data
                         @Category,
                         @Quantity,
                        @IsPromoted,
-                       @ProductServerId
+                       @ProductServerId,
+                       @FileUrl
                     );
                 ";
 
@@ -358,9 +529,216 @@ namespace WebshopMobileApp.Data
                     insertProductCommand.Parameters.AddWithValue("@IsPromoted", DbType.Int32).Value =
                         product.IsPromoted ? 1 : 0;
                    insertProductCommand.Parameters.AddWithValue("@ProductServerId", DbType.Int32).Value = product.Id;
-
+                   insertProductCommand.Parameters.AddWithValue("@FileUrl", DbType.String).Value =
+                        (object?)product.FileUrl ?? DBNull.Value;
             await insertProductCommand.ExecuteNonQueryAsync();
                 }
 
-}
+        public async Task CreateTableCategoriesLocally()
+        {
+
+            await using var connection = new SqliteConnection(Constants.DatabasePath);
+            await connection.OpenAsync();
+
+            try
+            {
+                var createTableCmd = connection.CreateCommand();
+                createTableCmd.CommandText = @"
+                        DROP TABLE IF EXISTS Categories;
+                        CREATE TABLE Categories (
+                            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            CategoryId INTEGER NULL,
+                            CategoryName TEXT NULL,
+                            FileUrl TEXT NULL
+                        );
+                    ";
+
+                await createTableCmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error creating Project table");
+                throw;
+            }
+
+        }
+
+
+        public async Task InsertCategory(Category category)
+        {
+            await using var connection = new SqliteConnection(Constants.DatabasePath);
+            await connection.OpenAsync();
+            var insertCategoryCommand = connection.CreateCommand();
+            insertCategoryCommand.CommandText = @"
+                    
+                    INSERT INTO Categories (
+                        CategoryId,
+                        CategoryName,
+                        FileUrl
+                    )
+                    VALUES (
+                        @CategoryId,
+                        @CategoryName,
+                        @FileUrl
+                    );
+                ";
+
+            insertCategoryCommand.Parameters.AddWithValue("@CategoryId", DbType.Int32).Value = category.CategoryId;
+            insertCategoryCommand.Parameters.AddWithValue("@CategoryName", DbType.String).Value = category.CategoryName;
+            insertCategoryCommand.Parameters.AddWithValue("@FileUrl", DbType.String).Value = category.FileUrl;
+            await insertCategoryCommand.ExecuteNonQueryAsync();
+        }
+
+        public async Task<List<ProductsWithQuantity>> GetProductsByFavorites()
+        {
+            await using var connection = new SqliteConnection(Constants.DatabasePath);
+            await connection.OpenAsync();
+
+            var selectCmd = connection.CreateCommand();
+            selectCmd.CommandText = "SELECT * FROM Products where isFavoured = 1 ORDER BY Description ASC";
+            var products = new List<ProductsWithQuantity>();
+
+            await using (var reader = await selectCmd.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    products.Add(new ProductsWithQuantity
+                    {
+                        Id = reader.GetInt32(0),
+                        Code = reader.GetString(1),
+                        Description = reader.GetString(2),
+                        QuantityOnHand = reader.GetDecimal(3),
+                        HasImage = reader.GetBoolean(4),
+                        Image = reader.IsDBNull(5) ? null : (byte[])reader[5],
+                        Price = reader.GetDecimal(6),
+                        PriceIncl = reader.GetDecimal(7),
+                        OnSpecial = reader.GetBoolean(8),
+                        SpecialPrice = reader.IsDBNull(9) ? null : reader.GetDecimal(9),
+                        TypicalOrderQuantity = reader.IsDBNull(10) ? null : reader.GetDecimal(10),
+                        TaxPercentage = reader.GetDecimal(11),
+                        UOM = reader.IsDBNull(12) ? null : reader.GetString(12),
+
+                        Category1 = reader.IsDBNull(13) ? null : reader.GetString(13),
+                        Category2 = reader.IsDBNull(14) ? null : reader.GetString(14),
+                        Category3 = reader.IsDBNull(15) ? null : reader.GetString(15),
+                        Category4 = reader.IsDBNull(16) ? null : reader.GetString(16),
+                        Category5 = reader.IsDBNull(17) ? null : reader.GetString(17),
+                        Category6 = reader.IsDBNull(18) ? null : reader.GetString(18),
+                        Category7 = reader.IsDBNull(19) ? null : reader.GetString(19),
+                        Category8 = reader.IsDBNull(20) ? null : reader.GetString(20),
+
+                        isFavoured = reader.GetBoolean(21),
+                        InfoApproved = reader.GetBoolean(22),
+                        CategoryId = reader.GetInt32(23),
+                        Category = reader.GetString(24),
+                        Quantity = reader.GetInt32(25),
+                        IsPromoted = reader.GetBoolean(26),
+                        ProductServerId = reader.GetInt32(27),
+                        FileUrl = reader.GetString(28)
+                    });
+                }
+
+            }
+            if (products.Count == 0)
+            {
+                selectCmd.CommandText = "SELECT * FROM Products LIMIT 2";
+                 products = new List<ProductsWithQuantity>();
+
+                await using var reader1 = await selectCmd.ExecuteReaderAsync();
+                while (await reader1.ReadAsync())
+                {
+                    products.Add(new ProductsWithQuantity
+                    {
+                        Id = reader1.GetInt32(0),
+                        Code = reader1.GetString(1),
+                        Description = reader1.GetString(2),
+                        QuantityOnHand = reader1.GetDecimal(3),
+                        HasImage = reader1.GetBoolean(4),
+                        Image = reader1.IsDBNull(5) ? null : (byte[])reader1[5],
+                        Price = reader1.GetDecimal(6),
+                        PriceIncl = reader1.GetDecimal(7),
+                        OnSpecial = reader1.GetBoolean(8),
+                        SpecialPrice = reader1.IsDBNull(9) ? null : reader1.GetDecimal(9),
+                        TypicalOrderQuantity = reader1.IsDBNull(10) ? null : reader1.GetDecimal(10),
+                        TaxPercentage = reader1.GetDecimal(11),
+                        UOM = reader1.IsDBNull(12) ? null : reader1.GetString(12),
+
+                        Category1 = reader1.IsDBNull(13) ? null : reader1.GetString(13),
+                        Category2 = reader1.IsDBNull(14) ? null : reader1.GetString(14),
+                        Category3 = reader1.IsDBNull(15) ? null : reader1.GetString(15),
+                        Category4 = reader1.IsDBNull(16) ? null : reader1.GetString(16),
+                        Category5 = reader1.IsDBNull(17) ? null : reader1.GetString(17),
+                        Category6 = reader1.IsDBNull(18) ? null : reader1.GetString(18),
+                        Category7 = reader1.IsDBNull(19) ? null : reader1.GetString(19),
+                        Category8 = reader1.IsDBNull(20) ? null : reader1.GetString(20),
+
+                        isFavoured = reader1.GetBoolean(21),
+                        InfoApproved = reader1.GetBoolean(22),
+                        CategoryId = reader1.GetInt32(23),
+                        Category = reader1.GetString(24),
+                        Quantity = reader1.GetInt32(25),
+                        IsPromoted = reader1.GetBoolean(26),
+                        ProductServerId = reader1.GetInt32(27),
+                        FileUrl = reader1.GetString(28)
+                    });
+                }
+
+            }
+
+            return products;
+        }
+
+        public async Task<List<ProductsWithQuantity>> GetProductsAside()
+        {
+            string token = Preferences.Default.Get("token", "null");
+            int customerId = Preferences.Default.Get("customerId", 0);
+            var typicalproducts = new List<TblTypicalOrdersSet>();    
+            var options = new RestClientOptions(API_URL)
+            {
+                // MaxTimeout = -1,
+            };
+            var client = new RestClient(options);
+            if (customerId == 0)
+            {
+                return new List<ProductsWithQuantity>();
+            }
+            var deliveryDate = DateTime.Now.ToString("yyyy-MM-dd");
+            var request = new RestRequest($"/api/Products/GetAllTypicalProducts?CustomerId={customerId}", Method.Get);
+            RestResponse response = await client.ExecuteAsync(request);
+            Console.WriteLine(response.Content);
+            if (response.Content != null)
+            {
+                 typicalproducts = Newtonsoft.Json.JsonConvert.DeserializeObject<List<TblTypicalOrdersSet>>(response.Content);
+            }
+
+            if (typicalproducts == null || typicalproducts.Count == 0)
+            {
+                return new List<ProductsWithQuantity>();
+            }
+            else
+            {
+                // Sync to IndexedDB
+                var Suggestion = new List<ProductsWithQuantity>();    
+                var cartItems = await cartRepository.GetCartData();
+                var allProducts = await GetProductsLocally();
+                
+                    var typicalProductIds = typicalproducts.Select(t => t.TblTypicalOrdersTblProducts).ToHashSet();
+                    var typicalProductModels = allProducts.Where(p => typicalProductIds.Contains(p.Id)).ToList();
+
+                    foreach (var product in typicalProductModels)
+                    {
+                        Suggestion.Add(product);
+                    }
+
+                    Console.WriteLine("SuggCount1" + Suggestion.Count());
+
+                    var suggestionsNotInCart = typicalProductModels
+                        .Where(p => !cartItems.Any(c => c.ProductServerId == p.Id))
+                        .ToList();
+                    Console.WriteLine("Suggestions" + suggestionsNotInCart.Count);
+                    Console.WriteLine("SuggCount2" + Suggestion.Count());
+                    return suggestionsNotInCart;
+            }
+        }
+    }
 }

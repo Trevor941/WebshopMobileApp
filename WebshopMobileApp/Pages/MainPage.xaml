@@ -63,7 +63,7 @@
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="models:TblPromoPicturesSet">
                                             <VerticalStackLayout Spacing="6">
-                                                <controls:SlotCardView WidthRequest="320" />
+                                                <controls:SlotCardView WidthRequest="220" />
                                             </VerticalStackLayout>
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>

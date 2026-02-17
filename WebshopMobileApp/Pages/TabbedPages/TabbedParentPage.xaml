@@ -12,6 +12,6 @@
 
     <local:Home Title="Home" IconImageSource="home.png" />
     <!--<local:Catalog Title="Catalog" IconImageSource="catalog.png" />-->
-    <local:Favorites Title="Favorites" IconImageSource="heart.png" />
+    <!--<local:Favorites Title="Favorites" IconImageSource="heart.png" />-->
     <local:Profile Title="Profile" IconImageSource="avatar.png" />
 </TabbedPage>

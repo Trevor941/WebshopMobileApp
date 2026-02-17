@@ -13,14 +13,14 @@ namespace WebshopMobileApp.Data
     public class LoginRepository
     {
         private readonly ILogger _logger;
-
+        public string API_URL = Constants.API_URL;
         public LoginRepository(ILogger<UserResponse> logger)
         {
             _logger = logger;
         }
         public async Task<UserResponse> LoginAPICall(string username, string password)
         {
-            var options = new RestClientOptions("https://orders.lumarfoods.co.za:20603")
+            var options = new RestClientOptions(API_URL)
             {
                 // MaxTimeout = -1,
             };

@@ -21,6 +21,7 @@ namespace WebshopMobileApp
             _model = model;
             _cardRepository = cardRepository;
             GetCartItems();
+            LoadCategories();
         }
         public static async Task DisplaySnackbarAsync(string message)
         {
@@ -47,7 +48,7 @@ namespace WebshopMobileApp
                 var Cart = await _cardRepository.GetCartData();
                 if (Cart.Count > 0)
                 {
-                     UpdateCartCount(Cart.Count);
+                     UpdateCartCount(Cart.Sum(p => p.Quantity));
                 }
 
             }
@@ -82,10 +83,10 @@ namespace WebshopMobileApp
 
         private async void OnShellNavigating(object sender, ShellNavigatingEventArgs e)
         {
-            if (e.Target.Location.OriginalString.Contains("catalog2"))
+            if (e.Target.Location.OriginalString.Equals("//main/catalog"))
             {
                 e.Cancel(); // stop normal navigation
-                await Shell.Current.GoToAsync("//catalog?categoryId=6");
+                await Shell.Current.GoToAsync("//catalog?categoryId=0");
             }
         }
 
@@ -94,40 +95,44 @@ namespace WebshopMobileApp
             await Shell.Current.GoToAsync("//mycart");
         }
 
-        //public async void LoadCategories()
-        //{
-        //    var localproducts = await _productRepository.GetProductsLocally();
-        //    var categories = localproducts.Where(p => !string.IsNullOrEmpty(p.Category))
-        //     .GroupBy(p => new { p.CategoryId, p.Category })
-        //     .Select(g => (g.Key.CategoryId, g.Key.Category)).OrderBy(x => x.Category).ToList();
+        public async Task LoadCategories()
+        {
+            var categories = await _productRepository.GetCategoriesLocally();
 
-        //    if (categories.Count > 0)
-        //    {
-        //        foreach (var category in categories)
-        //        {
-        //            // Add the category ID as a query parameter in the route
-        //            // string routeWithQuery = $"{nameof(CatalogPage)}?categoryId={category.Id}";
+            if (categories.Count > 0)
+            {
+                foreach (var category in categories)
+                {
+                    // Add the category ID as a query parameter in the route
+                    // string routeWithQuery = $"{nameof(CatalogPage)}?categoryId={category.Id}";
 
-        //            var shellContent = new ShellContent
-        //            {
-        //                Title = category.Category,
-        //                // Icon = !string.IsNullOrEmpty(category.Icon) ? ImageSource.FromFile(category.Icon) : null,
-        //                  ContentTemplate = new DataTemplate(() => new Catalog(_model)),
-        //                // Route = category.Route // unique Shell route
-        //                Route = $"catalog{category.CategoryId}"
-        //            };
+                    var shellContent = new ShellContent
+                    {
+                        Title = category.CategoryName,
+                         Icon =  ImageSource.FromFile("catalog.png"),
+                        ContentTemplate = new DataTemplate(() => new Catalog(_model)),
+                        // Route = category.Route // unique Shell route
+                        Route = $"catalog_{category.CategoryId}"
+                    };
 
-        //            // Handle click/navigation using Shell
-        //            shellContent.Disappearing += async (s, e) =>
-        //            {
-        //               // await Shell.Current.GoToAsync($"//catalog? {category.CategoryId}" );
-        //                await Shell.Current.GoToAsync($"//catalog?{category.CategoryId}");
-        //            };
+                    // Handle click/navigation using Shell
+                    shellContent.Appearing += async (s, e) =>
+                    {
+                        // await Shell.Current.GoToAsync($"//catalog? {category.CategoryId}" );
+                        if(category.CategoryId != null)
+                        {
+                            if(category.CategoryId >= 0)
+                            {
+                                await Shell.Current.GoToAsync($"//catalog?categoryId={category.CategoryId}");
+                            }
 
-        //            this.Items.Add(shellContent);
-        //        }
-        //    }
-        //}
+                        }
+                    };
+
+                    this.Items.Add(shellContent);
+                }
+            }
+        }
 
 
     }

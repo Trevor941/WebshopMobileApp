@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:sf="clr-namespace:Syncfusion.Maui.Toolkit.SegmentedControl;assembly=Syncfusion.Maui.Toolkit"
     xmlns:pages="clr-namespace:WebshopMobileApp.Pages"
+    xmlns:models="clr-namespace:WebshopMobileApp.Models"
     xmlns:pagestabbed="clr-namespace:WebshopMobileApp.Pages.TabbedPages"
     Shell.FlyoutBehavior="Flyout"
     Shell.TitleColor="#fff"
@@ -16,8 +17,13 @@
     Shell.TabBarForegroundColor="#fff"
     Shell.TabBarUnselectedColor="#ddd"
     Shell.TabBarTitleColor="#fff"
-     Navigating="OnShellNavigating"
+    Navigating="OnShellNavigating"
     >
+
+
+    <!--<Shell.BindingContext>
+        <vm:ProductsListPageModel />
+    </Shell.BindingContext>-->
 
 
 
@@ -27,10 +33,10 @@
       ContentTemplate="{DataTemplate pages:LoginPage}" 
       Route="login" />
     <!--<ShellContent
-        Title="Dashboard"
+        Title="mainp"
         Icon="{StaticResource IconDashboard}"
-        ContentTemplate="{DataTemplate pages:MainPage}"
-        Route="main" />-->
+        ContentTemplate="{DataTemplate pagestabbed:Catalog}"
+        Route="mainp" />
     <ShellContent
      Title="Test"
      Icon="{StaticResource IconDashboard}"
@@ -40,13 +46,13 @@
         Title="Catalog 2"
         Icon="{StaticResource IconDashboard}"
         ContentTemplate="{DataTemplate pagestabbed:Catalog}" 
-        Route="catalog2" />
+        Route="catalog2" />-->
     <ShellContent
      Title="My Cart"
      Icon="{StaticResource IconDashboard}"
      ContentTemplate="{DataTemplate pages:MyCart}" 
      Route="mycart" />
-
+     
     <TabBar Title="Menu" Route="main">
         <Tab Title="Home" Icon="home.png">
             <ShellContent Route="home" ContentTemplate="{DataTemplate pages:MainPage}" />

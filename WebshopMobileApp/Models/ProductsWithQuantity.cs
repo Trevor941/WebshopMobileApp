@@ -36,8 +36,40 @@ namespace WebshopMobileApp.Models
 
     public class Category 
     {
+        [Key]
+        public int Id { get; set; }
         public int? CategoryId { get; set; }
         public string? CategoryName { get; set; }
         public string? FileUrl { get; set; }
+    }
+
+    public class TblTypicalOrdersSet
+    {
+        public int Id { get; set; }
+
+        public byte[] RowVersion { get; set; } = null!;
+
+        public decimal? Qty { get; set; }
+        public decimal? qtyOnHand { get; set; }
+
+        public int? PushType { get; set; }
+
+        public string? ProductCode { get; set; }
+
+        public string? ProductDesc { get; set; }
+
+        public string? CustomerCode { get; set; }
+
+        public string? CustomerDesc { get; set; }
+
+        public decimal? CommissionPayable { get; set; }
+
+        public int TblTypicalOrdersTblProducts { get; set; }
+
+        public int TblTypicalOrdersTblCustomer { get; set; }
+
+        //public virtual TblCustomer TblTypicalOrdersTblCustomerNavigation { get; set; } = null!;
+
+        //public virtual TblProductsSet TblTypicalOrdersTblProductsNavigation { get; set; } = null!;
     }
 }

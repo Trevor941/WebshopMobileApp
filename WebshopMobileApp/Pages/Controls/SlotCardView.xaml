@@ -8,7 +8,7 @@
     <Border StrokeThickness="0" Stroke="#000" Padding="0" StrokeShape="RoundRectangle 0">
         <VerticalStackLayout Spacing="0">
             <!-- The inner WebView -->
-            <WebView x:Name="VideoWebView" HeightRequest="250" />
+            <WebView x:Name="VideoWebView" HeightRequest="200" />
         </VerticalStackLayout>
     </Border>
     

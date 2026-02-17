@@ -14,8 +14,8 @@
 
     <!--<ContentPage.Behaviors>
             <toolkit:EventToCommandBehavior
-            EventName="NavigatedTo"
-            Command="{Binding LoadItemsCommand}" />
+            EventName="Loaded"
+            Command="{Binding AppearingLoadCommand}" />
     </ContentPage.Behaviors>-->
 
  
@@ -83,8 +83,13 @@
                                     HeightRequest="120"
                                     BackgroundColor="#0698d5"
         
-                            Margin="0"/>
-
+                            Margin="0">
+                                    <Image.GestureRecognizers>
+                                        <TapGestureRecognizer 
+                                          Command="{Binding x:DataType='pageModels:ProductsListPageModel', Source={RelativeSource AncestorType={x:Type pageModels:ProductsListPageModel}}, Path=ProductPopupCommand}"
+                                          CommandParameter="{Binding}" />
+                                    </Image.GestureRecognizers>
+                                </Image>
                             </Border>
 
                             <!-- Product Details -->
@@ -128,20 +133,6 @@
                                             CommandParameter="{Binding}" TextColor="#666" BackgroundColor="Transparent" HeightRequest="70" WidthRequest="40"  />
                                         </HorizontalStackLayout>
                                     </Border>
-                                    
-                                    <!-- Decrement Button -->
-                                    <!--<Label Text="_" WidthRequest="20" Margin="0, 1" FontSize="Large" Grid.Column="0"/>
-                            -->
-                                    <!-- Quantity Label -->
-                                    <!-- Decrement Button -->
-                                    <!--
-                            <Label Text="{Binding Quantity}" WidthRequest="10" Margin="0, 15" Grid.Column="1"/>-->
-
-                                    <!--<Label Text="{Binding Quantity}" WidthRequest="10" HorizontalTextAlignment="Center" Grid.Column="1"/>-->
-                                    <!-- Increment Button -->
-                                    <!--<Label Text="+" WidthRequest="10" Grid.Column="2"/>-->
-                                    <!--<Label Text="+" WidthRequest="50" Margin="0, 10" FontSize="Large" Grid.Column="0"/>-->
-                                    <!-- Add Button -->
                                     <Button Text="Add" FontSize="18" CornerRadius="28" Command="{Binding x:DataType='pageModels:ProductsListPageModel', Source={RelativeSource AncestorType={x:Type pageModels:ProductsListPageModel}}, Path=AddToCartCommand}"
                                     CommandParameter="{Binding}"  HeightRequest="30" Padding="0" BackgroundColor="#0698d5" HorizontalOptions="End" Grid.Column="1" WidthRequest="100" />
                                 </Grid>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+x:Class="WebshopMobileApp.Pages.Controls.PopupRecommendedProduct"
+xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+xmlns:models="clr-namespace:WebshopMobileApp.Models"
+x:DataType="models:ProductsWithQuantity"
+xmlns:pageModels="clr-namespace:WebshopMobileApp.PageModels"
+CanBeDismissedByTappingOutsideOfPopup="false"
+>
+    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10" Padding="10" Background="#f1f1f1" WidthRequest="300" >
+        <!-- Product Image -->
+        <Border Stroke="Black" StrokeThickness="0" Padding="0"  StrokeShape="RoundRectangle 0">
+            <VerticalStackLayout>
+                <Image Grid.Row="0"
+            Source="{Binding FileUrl}"
+            Aspect="AspectFit"
+                    
+                    BackgroundColor="#0698d5"
+    
+            Margin="0"/>
+            </VerticalStackLayout>
+
+        </Border>
+
+        <!-- Product Details -->
+        <StackLayout Grid.Row="1" Margin="5" Spacing="5">
+            <!-- Title -->
+            <Label Text="{Binding Description}" FontSize="Small" FontAttributes="Bold"/>
+            <!-- Product Code -->
+            <Label Text="{Binding Code}" FontSize="Small" TextColor="Gray"/>
+
+            <!-- Price and Availability -->
+            <Grid RowDefinitions="Auto">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Label Text="{Binding Price, StringFormat='R{0:F2}'}"
+       FontSize="Medium" TextColor="#0698d5" FontAttributes="Bold"
+       Grid.Column="0"/>
+                <Button Text="X" FontSize="20" CornerRadius="28" Command="{Binding x:DataType='pageModels:MyCartPageModel', Source={RelativeSource AncestorType={x:Type pageModels:MyCartPageModel}}, Path=RecommendedProdCancelCartQtyUpdateCommand}"
+      CommandParameter="{Binding}"  HeightRequest="10" Padding="0" BackgroundColor="Red" HorizontalOptions="End" Grid.Column="1" WidthRequest="10" />
+            </Grid>
+
+            <!-- Quantity and Add Button -->
+            <Grid RowDefinitions="Auto" ColumnSpacing="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Stroke="#ddd" StrokeThickness="1" Padding="0" HeightRequest="38" StrokeShape="RoundRectangle 4">
+                    <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="0"   BackgroundColor="#fff">
+                        <Button Text="-" FontSize="Large"   Command="{Binding x:DataType='pageModels:MyCartPageModel', Source={RelativeSource AncestorType={x:Type pageModels:MyCartPageModel}}, Path=RecommendedProdDecrementQuantityCommand}"
+                  CommandParameter="{Binding}" TextColor="#666" BackgroundColor="Transparent" HeightRequest="70" WidthRequest="40"  />
+                        <Label Text="{Binding Quantity}" FontSize="Medium" HorizontalOptions="Center" VerticalOptions="Center" />
+
+                        <Button Text="+" FontSize="Large"  Command="{Binding x:DataType='pageModels:MyCartPageModel', Source={RelativeSource AncestorType={x:Type pageModels:MyCartPageModel}}, Path=RecommendedProdIncrementQuantityCommand}"
+                CommandParameter="{Binding}" TextColor="#666" BackgroundColor="Transparent" HeightRequest="70" WidthRequest="40"  />
+                    </HorizontalStackLayout>
+                </Border>
+                <Button Text="Add to Cart" FontSize="18" CornerRadius="28" Command="{Binding x:DataType='pageModels:MyCartPageModel', Source={RelativeSource AncestorType={x:Type pageModels:MyCartPageModel}}, Path=AddNewCartItemCommand}"
+               CommandParameter="{Binding}"  HeightRequest="30" Padding="0" BackgroundColor="#0698d5" HorizontalOptions="End" Grid.Column="1" WidthRequest="120" />
+            </Grid>
+        </StackLayout>
+    </Grid>
+</toolkit:Popup>

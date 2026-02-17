@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,6 +14,7 @@ namespace WebshopMobileApp.Data
     public class CartRepository
     {
         private readonly ILogger _logger;
+        public string API_URL = Constants.API_URL;
         public CartRepository(ILogger<CartModel> logger)
         {
             _logger = logger;
@@ -24,7 +26,7 @@ namespace WebshopMobileApp.Data
             await connection.OpenAsync();
 
             var selectCmd = connection.CreateCommand();
-            selectCmd.CommandText = "SELECT * FROM Cart";
+            selectCmd.CommandText = "SELECT * FROM Cart ORDER BY Id DESC";
             var products = new List<CartModel>();
 
             await using var reader = await selectCmd.ExecuteReaderAsync();
@@ -36,7 +38,7 @@ namespace WebshopMobileApp.Data
                     ProductServerId = reader.GetInt32(1),
                     ProductCode = reader.GetString(2),
                     Quantity = reader.GetInt32(3),
-                    Price = reader.IsDBNull(4) ? null : reader.GetDecimal(4),
+                    Price =  reader.GetDecimal(4),
                     PriceIncl = reader.GetDecimal(5),
                     HasImage = reader.GetBoolean(6),
                     Description = reader.GetString(7),
@@ -46,19 +48,19 @@ namespace WebshopMobileApp.Data
                     lineTotal = reader.GetDecimal(11),
                     NettPrice = reader.GetDecimal(12),
                     VatTotal = reader.GetDecimal(13),
-                   
+                    FileUrl = reader.GetString(14)
                 });
             }
             return products;
         }
 
-        public async Task<int> CheckProductExist(int ProductServerId)
+        public async Task<CartModel> CheckProductExist(string ProductCode)
         {
             await using var connection = new SqliteConnection(Constants.DatabasePath);
             await connection.OpenAsync();
 
             var selectCmd = connection.CreateCommand();
-            selectCmd.CommandText = $"SELECT ProductServerId FROM Cart where ProductServerId = {ProductServerId}";
+            selectCmd.CommandText = $"SELECT * FROM Cart where ProductCode = '{ProductCode}'";
             var products = new List<CartModel>();
 
             await using var reader = await selectCmd.ExecuteReaderAsync();
@@ -66,20 +68,21 @@ namespace WebshopMobileApp.Data
             {
                 products.Add(new CartModel
                 {
-                    ProductServerId = reader.GetInt32(0),
-                    //ProductServerId = reader.GetInt32(1),
-                    //ProductCode = reader.GetString(2),
-                    //Quantity = reader.GetInt32(3),
-                    //Price = reader.IsDBNull(4) ? null : reader.GetDecimal(4),
-                    //PriceIncl = reader.GetDecimal(5),
-                    //HasImage = reader.GetBoolean(6),
-                    //Description = reader.GetString(7),
-                    //UnitOfSale = reader.GetString(8),
-                    //TaxPercentage = reader.GetDecimal(9),
-                    //TotalInc = reader.GetDecimal(10),
-                    //lineTotal = reader.GetDecimal(11),
-                    //NettPrice = reader.GetDecimal(12),
-                    //VatTotal = reader.GetDecimal(13),
+                    Id = reader.GetInt32(0),
+                    ProductServerId = reader.GetInt32(1),
+                    ProductCode = reader.GetString(2),
+                    Quantity = reader.GetInt32(3),
+                    Price =  reader.GetDecimal(4),
+                    PriceIncl = reader.GetDecimal(5),
+                    HasImage = reader.GetBoolean(6),
+                    Description = reader.GetString(7),
+                    UnitOfSale = reader.GetString(8),
+                    TaxPercentage = reader.GetDecimal(9),
+                    TotalInc = reader.GetDecimal(10),
+                    lineTotal = reader.GetDecimal(11),
+                    NettPrice = reader.GetDecimal(12),
+                    VatTotal = reader.GetDecimal(13),
+                    FileUrl = reader.GetString(14)
 
                 });
             }
@@ -88,10 +91,10 @@ namespace WebshopMobileApp.Data
                var product = products.FirstOrDefault();
                 if (product != null)
                 {
-                    return ProductServerId;
+                    return product;
                 }
             }
-            return 0;
+            return new CartModel();
         }
 
         public async Task DeleteCartItem(int ProductServerId)
@@ -113,7 +116,27 @@ namespace WebshopMobileApp.Data
                 Console.WriteLine(e.Message + "Error Delete From Cart table");
                 throw;
             }
+        }
 
+        public async Task ClearCart()
+        {
+
+            await using var connection = new SqliteConnection(Constants.DatabasePath);
+            await connection.OpenAsync();
+
+            try
+            {
+                var createTableCmd = connection.CreateCommand();
+                createTableCmd.CommandText = @$"Delete From Cart";
+
+
+                await createTableCmd.ExecuteNonQueryAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message + "Error ClearCart");
+                throw;
+            }
         }
 
         public async Task CreateTableCart()
@@ -126,11 +149,10 @@ namespace WebshopMobileApp.Data
             {
                 var createTableCmd = connection.CreateCommand();
                 createTableCmd.CommandText = @"
-                         
                                   CREATE TABLE Cart (
                             Id INTEGER PRIMARY KEY AUTOINCREMENT,
                             ProductServerId INTEGER NOT NULL UNIQUE,
-                            ProductCode TEXT NOT NULL,
+                            ProductCode TEXT NOT NULL UNIQUE,
                             Quantity INTEGER NOT NULL,
                             Price NUMERIC NOT NULL,
                             PriceIncl NUMERIC NOT NULL,
@@ -141,7 +163,8 @@ namespace WebshopMobileApp.Data
                             TotalInc NUMERIC NOT NULL DEFAULT 0,
                             lineTotal NUMERIC NOT NULL DEFAULT 0,
                             NettPrice NUMERIC NOT NULL DEFAULT 0,
-                            VatTotal NUMERIC NOT NULL DEFAULT 0
+                            VatTotal NUMERIC NOT NULL DEFAULT 0,
+                            FileUrl TEXT NOT NULL
                         );
                     ";
                 await createTableCmd.ExecuteNonQueryAsync();
@@ -154,14 +177,14 @@ namespace WebshopMobileApp.Data
 
         }
 
-        public async Task InsertCart(CartModel cartModel)
+        public async Task InsertUpdateCart(CartModel cartModel)
         {
             await using var connection = new SqliteConnection(Constants.DatabasePath);
             await connection.OpenAsync();
             var insertCommand = connection.CreateCommand();
 
-            var productServerId = await CheckProductExist(cartModel.ProductServerId);
-            if (productServerId == 0)
+            var cartItem = await CheckProductExist(cartModel.ProductCode);
+            if (cartItem.ProductServerId == 0)
             {
                 insertCommand.CommandText = @"
                     
@@ -178,7 +201,8 @@ namespace WebshopMobileApp.Data
                         TotalInc,
                         lineTotal,
                         NettPrice,
-                        VatTotal
+                        VatTotal,
+                       FileUrl
                     )
                     VALUES (
                         @ProductServerId,
@@ -193,7 +217,8 @@ namespace WebshopMobileApp.Data
                         @TotalInc,
                         @lineTotal,
                         @NettPrice,
-                        @VatTotal
+                        @VatTotal,
+                        @FileUrl
                     );
                 ";
             }
@@ -232,8 +257,33 @@ namespace WebshopMobileApp.Data
                 (object?)cartModel.NettPrice ?? DBNull.Value;
             insertCommand.Parameters.AddWithValue("@VatTotal", DbType.Double).Value =
                 (object?)cartModel.VatTotal ?? DBNull.Value;
+            insertCommand.Parameters.AddWithValue("@FileUrl", DbType.String).Value =
+                (object?)cartModel.FileUrl ?? DBNull.Value;
 
             await insertCommand.ExecuteNonQueryAsync();
+        }
+
+        public async Task<int> PostCart(CartPostRequest postRequest)
+        {
+            var NewOID = 0;
+            int customerId = Preferences.Default.Get("customerId", 0);
+            var options = new RestClientOptions(API_URL)
+            {
+                // MaxTimeout = -1,
+            };
+            var client = new RestClient(options);
+            
+            var request = new RestRequest($"{API_URL}/api/Products/PostCart", Method.Post);
+            request.AddHeader("Content-Type", "application/json");
+            var body = Newtonsoft.Json.JsonConvert.SerializeObject(postRequest);
+            request.AddStringBody(body, DataFormat.Json);
+            RestResponse response = await client.ExecuteAsync(request);
+            Console.WriteLine(response.Content);
+            if (response.Content != null)
+            {
+                NewOID = Newtonsoft.Json.JsonConvert.DeserializeObject<int>(response.Content);
+            }
+            return NewOID;
         }
     }
 }

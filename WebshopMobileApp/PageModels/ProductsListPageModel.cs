@@ -1,15 +1,16 @@
-﻿using System;
+﻿using CommunityToolkit.Maui.Views;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using WebshopMobileApp.Models;
+using WebshopMobileApp.Pages.Controls;
 
 namespace WebshopMobileApp.PageModels
 {
-    //[QueryProperty(nameof(ParameterToPassBack), "categoryId")]
     public partial class ProductsListPageModel : ObservableObject, IQueryAttributable
     {
         private readonly ProductRepository _productRepository;
@@ -24,20 +25,25 @@ namespace WebshopMobileApp.PageModels
         private bool _iSVisibleSpinner = true;
         [ObservableProperty]
         private string _deliveryDate = "";
+        [ObservableProperty]
+        private List<CartModel> _cart = [];
         private string _searchText;
         private List<ProductsWithQuantity> FilteredProducts = new List<ProductsWithQuantity>();
         private List<ProductsWithQuantity> UnFilteredProducts = new List<ProductsWithQuantity>();
-        private string _parameterToPassBack;
-        private CancellationTokenSource _cts;
-        public string CategoryId { get; set; }
-
+        private CancellationTokenSource _searchCts;
+        public string? CategoryId { get; set; }
+        [ObservableProperty]
+        private string _totalInc = string.Empty;
+        public int OldQty = 1;
+        private PopupRecommendedProduct _currentPopup;
         public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
+            CategoryId = null;
             if (query.TryGetValue("categoryId", out var value))
             {
                 CategoryId = value?.ToString();
                 // do your loading logic here
-                await LoadItems();
+                 await LoadItems();
             }
         }
         //public string ParameterToPassBack
@@ -59,7 +65,7 @@ namespace WebshopMobileApp.PageModels
                 _searchText = value;
                 OnPropertyChanged();
                 Task.Delay(2000);
-                FilterProducts(_searchText); // call your filter logic here
+                DebounceSearch(_searchText); // call your filter logic here
             }
         }
        
@@ -93,15 +99,17 @@ namespace WebshopMobileApp.PageModels
                     cart.Description = product.Description.Trim();
                     cart.UnitOfSale = product.UOM.Trim();
                     cart.TaxPercentage = product.TaxPercentage;
-                    cart.TotalInc = 1;
-                    cart.lineTotal = 1;
-                    cart.NettPrice = 1;
-                    cart.VatTotal = 1;
-
-                    await _cartRepository.InsertCart(cart);
+                    
+                    cart.NettPrice = Math.Round(cart.Price * cart.Quantity, 2);
+                    cart.VatTotal = Math.Round(cart.Price * (cart.TaxPercentage / 100), 2, MidpointRounding.AwayFromZero);
+                    var Vat = Math.Round(cart.NettPrice * (cart.TaxPercentage / 100), 2);
+                    cart.lineTotal = Math.Round(cart.NettPrice + Vat, 2);
+                    cart.TotalInc = 0;
+                    cart.FileUrl = product.FileUrl;
+                    await _cartRepository.InsertUpdateCart(cart);
                     product = new();
-                   var xyz = await _cartRepository.GetCartData();
-                 ((AppShell)Shell.Current).UpdateCartCount(xyz.Count);
+                   var Cart = await _cartRepository.GetCartData();
+                 ((AppShell)Shell.Current).UpdateCartCount(Cart.Sum(p => p.Quantity));
             }
         }
 
@@ -113,17 +121,27 @@ namespace WebshopMobileApp.PageModels
         }
 
         [RelayCommand]
-        private void DecrementQuantity(ProductsWithQuantity product)
+        private async Task AppearingLoad()
         {
-            Console.WriteLine($"clicked decrement button, , {product.Description}, quntity is {product.Quantity}");
+            await LoadItems();
+        }
+        
+        [RelayCommand]
+        private async Task DecrementQuantity(ProductsWithQuantity product)
+        {
+            Console.WriteLine($"clicked decrement button , {product.Description}, quntity is {product.Quantity}");
             if (product.Quantity > 1)
+            {
                 product.Quantity--;
+
+            }
         }
 
 
-       // [RelayCommand]
+        [RelayCommand]
         private async Task LoadItems()
         {
+          //  await GetCartItems();
             SearchText = "";
             ISVisibleSpinner = false;
            // DeliveryDate = "Delivery Date: " + DateTime.Now.AddDays(1).ToString("dd MMM yyyy");
@@ -131,12 +149,17 @@ namespace WebshopMobileApp.PageModels
             {
                 if(CategoryId == "0")
                 {
+                    await GetProducts();
                     return;
                 }
                 await LoadProductsByCategory(CategoryId);
                 return;
             }
-            await GetProducts();
+            else
+            {
+                await GetProducts();
+                return;
+            }
         }
 
         public async Task LoadProductsByCategory(string categoryId)
@@ -145,9 +168,10 @@ namespace WebshopMobileApp.PageModels
             //var SearchedProducts = UnFilteredProducts.Where(x => x.CategoryId.ToString() == categoryId).ToList();
             //if(SearchedProducts != null && SearchedProducts.Count > 0)
             //{
-                UnFilteredProducts = await _productRepository.GetProductsLocallyByCategory(Int32.Parse(categoryId));
+                UnFilteredProducts = await _productRepository.GetProductsByCategory(Int32.Parse(categoryId));
                 Products = UnFilteredProducts;
-                await ProductFileUrls();
+                CategoryId = "0";
+                categoryId = "0";
             //  }
             // Maybe load catalog items from API based on this ID
         }
@@ -155,36 +179,17 @@ namespace WebshopMobileApp.PageModels
         {
             try
             {
-                await _productRepository.CreateTableProductsLocally();
+                UnFilteredProducts = await _productRepository.GetProductsLocally();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-            }
-            UnFilteredProducts = await _productRepository.GetProductsLocally();
-            if (UnFilteredProducts.Count > 0)
-            {
-                Products = UnFilteredProducts;//.Take(10).ToList();
-                 await ProductFileUrls();
-            }
-            else
-            {
-                UnFilteredProducts = await _productRepository.GetProductsFromAPICall();
-                if (UnFilteredProducts.Count > 0)
+                var getitrue = await _productRepository.GetProductsFromAPICall();
+                if(getitrue == true)
                 {
-                    foreach (var product in Products)
-                    {
-                        await _productRepository.InsertProduct(product);
-                    }
                     UnFilteredProducts = await _productRepository.GetProductsLocally();
-                    if (UnFilteredProducts.Count > 0)
-                    {
-                        Products = UnFilteredProducts;//.Take(10).ToList();
-                        await ProductFileUrls();
-                    }
                 }
             }
-
         }
 
         private async Task GetSlots()
@@ -192,22 +197,15 @@ namespace WebshopMobileApp.PageModels
             Slots = await _productRepository.GetSlotsFromAPICall();
         }
 
-        private async Task ProductFileUrls()
+        [RelayCommand]
+        private async Task ProductPopup(ProductsWithQuantity model)
         {
-            foreach (var x in Products)
-            {
-                if (x.HasImage)
-                {
-                    x.FileUrl = "https://orders.lumarfoods.co.za:20603/images/" + x.ProductServerId + ".png";
-                }
-                else
-                {
-                    x.FileUrl = "https://orders.lumarfoods.co.za:20603/images/300px-no_image_available.svg.png";
-                }
-            }
+            OldQty = model.Quantity;
+            _currentPopup = new PopupRecommendedProduct(model);
+            await Application.Current.MainPage.ShowPopupAsync(_currentPopup);
         }
 
-        private void FilterProducts(string searchText)
+        private async void FilterProducts(string searchText)
         {
             ISVisibleSpinner = true;
             var productsvar = UnFilteredProducts;
@@ -221,14 +219,16 @@ namespace WebshopMobileApp.PageModels
 
             try
             {
-                if (searchText.Length >= 3)
-                {
-                    var results = Products.Where(p =>
-                    p.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                    ||
-                   p.Code.Contains(searchText, StringComparison.OrdinalIgnoreCase));
-                    Products = results.ToList();
-                }
+              ////  if (searchText.Length > 0)
+              ////  {
+              //      var results = Products.Where(p =>
+              //      p.Description.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+              //      ||
+              //     p.Code.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+              //      Products = results.ToList();
+              ////  }
+              ///
+              Products = await _productRepository.GetProductsBySearchWord(searchText);
             }
             catch (TaskCanceledException)
             {
@@ -237,5 +237,38 @@ namespace WebshopMobileApp.PageModels
            ISVisibleSpinner = false;
 
         }
+
+        private async Task GetCartItems()
+        {
+            try
+            {
+                Cart = await _cartRepository.GetCartData();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+        private async void DebounceSearch(string text)
+        {
+            _searchCts?.Cancel();
+            _searchCts = new CancellationTokenSource();
+            var token = _searchCts.Token;
+
+            try
+            {
+                await Task.Delay(500, token); // wait until user stops typing
+
+                if (token.IsCancellationRequested)
+                    return;
+
+                FilterProducts(text);
+            }
+            catch (TaskCanceledException)
+            {
+                // expected when user keeps typing
+            }
+        }
+
     }
 }

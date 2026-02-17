@@ -1,12 +1,134 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pageModels="clr-namespace:WebshopMobileApp.PageModels"
+             xmlns:models="clr-namespace:WebshopMobileApp.Models"
+             xmlns:controls="clr-namespace:WebshopMobileApp.Pages.Controls"
+             xmlns:pullToRefresh="clr-namespace:Syncfusion.Maui.Toolkit.PullToRefresh;assembly=Syncfusion.Maui.Toolkit"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="WebshopMobileApp.Pages.TabbedPages.Favorites"
-             Title="Favorites">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+             
+             x:DataType="pageModels:FavouriteListPageModel"
+             xmlns:local="clr-namespace:WebshopMobileApp"
+             Title="">
+
+    <ContentPage.Behaviors>
+            <toolkit:EventToCommandBehavior
+            EventName="Appearing"
+            Command="{Binding LoadItemsCommand}" />
+    </ContentPage.Behaviors>
+
+
+
+    <VerticalStackLayout Spacing="0" Padding="0, 0, 0 ,0">
+        <Border
+            BackgroundColor="#ffffff"
+            Stroke="#0698d5"
+            StrokeThickness="10"
+            Margin="12"
+            Padding="0">
+
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="0" />
+            </Border.StrokeShape>
+
+            <Grid ColumnDefinitions="Auto,*" VerticalOptions="Center" Background="#fff">
+                <Image
+            Source="search.png"
+                    
+            WidthRequest="25"
+            HeightRequest="25"
+            VerticalOptions="Center"
+            Margin="5,0,8,0" />
+
+                <Entry
+                 Text="{Binding SearchText, Mode=TwoWay}"
+                Grid.Column="1"
+                Placeholder="Search?"
+                FontAttributes="Bold"
+                PlaceholderColor="#666"
+                FontSize="14"
+                TextColor="#666"
+                ClearButtonVisibility="WhileEditing"
+                VerticalOptions="Center">
+
+                </Entry>
+            </Grid>
+        </Border>
+
+        <CollectionView x:Name="ProductsCollectionView"
+        ItemsSource="{Binding Products}"
+        Margin="10"  HeightRequest="550">
+            <CollectionView.ItemTemplate>
+                <DataTemplate  x:DataType="models:ProductsWithQuantity">
+                    <Border Stroke="#f1f1f1" BackgroundColor="blue"
+            StrokeThickness="1" 
+            Padding="10" 
+                    StrokeShape="RoundRectangle 18"
+            Margin="5" Background="#fff">
+                        <Grid ColumnDefinitions="*,2*" RowDefinitions="Auto,Auto,Auto"  >
+                            <!-- Product Image -->
+                            <Border Stroke="Black" StrokeThickness="0" Padding="0"  StrokeShape="RoundRectangle 8">
+                                <Image Grid.Column="0"
+                            Source="{Binding FileUrl}"
+                            Aspect="AspectFill"
+                                    HeightRequest="120"
+                                    BackgroundColor="#0698d5"
+        
+                            Margin="0"/>
+
+                            </Border>
+
+                            <!-- Product Details -->
+                            <StackLayout Grid.Column="1" Margin="10,0,0,0" Spacing="5">
+                                <!-- Title -->
+                                <Label Text="{Binding Description}" FontSize="Small" FontAttributes="Bold"/>
+                                <!-- Product Code -->
+                                <Label Text="{Binding Code}" FontSize="Small" TextColor="Gray"/>
+
+                                <!-- Price and Availability -->
+                                <Grid RowDefinitions="Auto">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Text="{Binding Price, StringFormat='R{0:F2}'}"
+                                   FontSize="Medium" TextColor="#0698d5" FontAttributes="Bold"
+                                   Grid.Column="0"/>
+                                    <Label Text="Available"
+                                   FontSize="Small"
+                                   TextColor="#47A140"
+                                   Margin="20,0,0,0"
+                                           FontAttributes="Bold"
+                                           HorizontalOptions="End"
+                                   Grid.Column="1"/>
+                                </Grid>
+
+                                <!-- Quantity and Add Button -->
+                                <Grid RowDefinitions="Auto" ColumnSpacing="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Stroke="#ddd" StrokeThickness="1" Padding="0" HeightRequest="38" StrokeShape="RoundRectangle 4">
+                                        <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="0"   BackgroundColor="#fff">
+                                            <Button Text="-" FontSize="Large"   Command="{Binding x:DataType='pageModels:FavouriteListPageModel', Source={RelativeSource AncestorType={x:Type pageModels:FavouriteListPageModel}}, Path=DecrementQuantityCommand}"
+                                              CommandParameter="{Binding}" TextColor="#666" BackgroundColor="Transparent" HeightRequest="70" WidthRequest="40"  />
+                                            <Label Text="{Binding Quantity}" FontSize="Medium" HorizontalOptions="Center" VerticalOptions="Center" />
+
+                                            <Button Text="+" FontSize="Large"  Command="{Binding x:DataType='pageModels:FavouriteListPageModel', Source={RelativeSource AncestorType={x:Type pageModels:FavouriteListPageModel}}, Path=IncrementQuantityCommand}"
+                                            CommandParameter="{Binding}" TextColor="#666" BackgroundColor="Transparent" HeightRequest="70" WidthRequest="40"  />
+                                        </HorizontalStackLayout>
+                                    </Border>
+                                    <Button Text="Add" FontSize="18" CornerRadius="28" Command="{Binding x:DataType='pageModels:FavouriteListPageModel', Source={RelativeSource AncestorType={x:Type pageModels:FavouriteListPageModel}}, Path=AddToCartCommand}"
+                                    CommandParameter="{Binding}"  HeightRequest="30" Padding="0" BackgroundColor="#0698d5" HorizontalOptions="End" Grid.Column="1" WidthRequest="100" />
+                                </Grid>
+                            </StackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </VerticalStackLayout>
+
 </ContentPage>

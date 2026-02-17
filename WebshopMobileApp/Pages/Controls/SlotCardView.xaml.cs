@@ -16,7 +16,7 @@ public partial class SlotCardView : ContentView
         string html = $@"
         <html>
             <body style='margin:0;padding:0;'>
-                <video autoplay style='width: 100%; height: 300px; object-fit: cover;' controls preload='metadata'>
+                <video autoplay style='width: 100%; height: 200px; object-fit: cover;' controls preload='metadata'>
                     <source src='{url}' type='video/mp4'>
                 </video>
             </body>

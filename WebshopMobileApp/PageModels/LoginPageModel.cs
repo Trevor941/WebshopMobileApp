@@ -44,6 +44,7 @@ namespace WebshopMobileApp.PageModels
                     try
                     {
                         Preferences.Default.Set("token", response.Token);
+                        Preferences.Default.Set("userEmail", Username);
                         Preferences.Default.Set("name", response.Name);
                         Preferences.Default.Set("customerId", response.CustomerId);
                      //   _navigation.GoToMainApp();
