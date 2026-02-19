@@ -35,16 +35,32 @@ namespace WebshopMobileApp.Data
             var body = Newtonsoft.Json.JsonConvert.SerializeObject(userrequest);
             request.AddStringBody(body, DataFormat.Json);
             RestResponse response = await client.ExecuteAsync(request);
-            Console.WriteLine(response.Content);
-             if(response.Content != null)
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                var userResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<UserResponse>(response.Content);
-                if (userResponse != null)
+                Console.WriteLine(response.Content);
+                if (response.Content != null)
                 {
-                    return userResponse;
+                    var userResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<UserResponse>(response.Content);
+                    if (userResponse != null)
+                    {
+                        return userResponse;
+                    }
                 }
             }
-             return new UserResponse();
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                    var userResponse = new UserResponse();
+                    userResponse.Name = "Username and password did not match";
+                    return userResponse;
+            }
+            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest || response.StatusCode == System.Net.HttpStatusCode.MethodNotAllowed)
+            {
+                var userResponse = new UserResponse();
+                userResponse.Name = "Internal server error. Contact admin!";
+                return userResponse;
+            }
+
+            return new UserResponse();
         }
     }
 }

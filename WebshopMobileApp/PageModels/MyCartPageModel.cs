@@ -40,7 +40,7 @@ namespace WebshopMobileApp.PageModels
         private string _totalIncStr = string.Empty;
         [ObservableProperty]
         private decimal _quantity = 1;
-        public decimal TotalInc { get; set; }
+        public decimal? TotalInc { get; set; }
         public OrderHeader orderHeader = new OrderHeader();
         public int DeliveryAddressiD = 0;
         public int RouteId = 0;
@@ -127,8 +127,8 @@ namespace WebshopMobileApp.PageModels
                 cart.UnitOfSale = product.UOM.Trim();
                 cart.TaxPercentage = product.TaxPercentage;
 
-                cart.NettPrice = Math.Round(cart.Price * cart.Quantity, 2);
-                cart.VatTotal = Math.Round(cart.Price * (cart.TaxPercentage / 100), 2, MidpointRounding.AwayFromZero);
+                cart.NettPrice = Math.Round((cart.Price * cart.Quantity) ?? 0m, 2);
+                cart.VatTotal = Math.Round((cart.Price * (cart.TaxPercentage / 100)) ?? 0m, 2, MidpointRounding.AwayFromZero);
                 var Vat = Math.Round(cart.NettPrice * (cart.TaxPercentage / 100), 2);
                 cart.lineTotal = Math.Round(cart.NettPrice + Vat, 2);
                 cart.TotalInc = 0;
@@ -176,8 +176,8 @@ namespace WebshopMobileApp.PageModels
             {
                 TotalInc += cartModel.Quantity * cartModel.PriceIncl;
             }
-            TotalIncStr = $"Total: R {TotalInc.ToString("N2")} Inc";
-            return $"TOTAL :  R {TotalInc.ToString("N2")}";
+            TotalIncStr = $"Total: R {TotalInc.Value.ToString("N2")} Inc";
+            return $"TOTAL :  R {TotalInc.Value.ToString("N2")}";
         }
 
 
@@ -301,8 +301,8 @@ namespace WebshopMobileApp.PageModels
                 cartItem.ProductID = item.ProductServerId;
                 cartItem.ProductCode = item.ProductCode;
                 cartItem.Quantity = item.Quantity;
-                cartItem.Price = Math.Round(item.Price, 2);
-                cartItem.PriceIncl = Math.Round(item.PriceIncl, 2);
+                cartItem.Price = Math.Round(item.Price ?? 0m, 2);
+                cartItem.PriceIncl = Math.Round(item.PriceIncl ?? 0m, 2);
                 cartItem.HasImage = item.HasImage;
                 cartItem.Description = item.Description;
                 cartItem.UnitOfSale = item.UnitOfSale;
@@ -339,7 +339,7 @@ namespace WebshopMobileApp.PageModels
             Cart =  await _cartRepository.GetCartData();
             ((AppShell)Shell.Current).UpdateCartCount(Cart.Sum(p => p.Quantity));
             TotalInc = 0;
-            TotalIncStr = $"Total: R {TotalInc.ToString("N2")} Inc";
+            TotalIncStr = $"Total: R {TotalInc.Value.ToString("N2")} Inc";
         }
 
         [RelayCommand]
@@ -401,10 +401,10 @@ namespace WebshopMobileApp.PageModels
             {
               
                 cart.Quantity = cart.Quantity;
-                cart.Price = Math.Round(cart.Price, 2);
-                cart.PriceIncl = Math.Round(cart.PriceIncl * cart.Quantity, 2);
-                cart.NettPrice = Math.Round(cart.Price * cart.Quantity, 2);
-                cart.VatTotal = Math.Round(cart.Price * (cart.TaxPercentage / 100), 2, MidpointRounding.AwayFromZero);
+                cart.Price = Math.Round(cart.Price ?? 0m, 2);
+                cart.PriceIncl = Math.Round(cart.PriceIncl * cart.Quantity ?? 0m, 2);
+                cart.NettPrice = Math.Round((cart.Price * cart.Quantity) ?? 0m, 2);
+                cart.VatTotal = Math.Round((cart.Price * (cart.TaxPercentage / 100)) ?? 0m, 2, MidpointRounding.AwayFromZero);
                 var Vat = Math.Round(cart.NettPrice * (cart.TaxPercentage / 100), 2);
                 cart.lineTotal = Math.Round(cart.NettPrice + Vat, 2);
                 cart.TotalInc = 0;

@@ -47,9 +47,13 @@ namespace WebshopMobileApp.Data
                     if (products.Count > 0)
                     {
                         await CreateTableProductsLocally();
+                        await ProductFileUrls(products);
                         foreach (var product in products)
                         {
-                            await InsertProduct(product);
+                            if(product.Price != null)
+                            {
+                                await InsertProduct(product);
+                            }
                         }
                         await ProductFileUrls(products);
                         var cati = products.Where(p => !string.IsNullOrEmpty(p.Category))
@@ -355,7 +359,7 @@ namespace WebshopMobileApp.Data
                 var createTableCmd = connection.CreateCommand();
                 createTableCmd.CommandText = @"
           
-
+                DROP TABLE IF EXISTS Products;
                CREATE TABLE Products (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
 

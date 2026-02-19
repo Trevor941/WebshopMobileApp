@@ -18,16 +18,16 @@ namespace WebshopMobileApp.Models
         public decimal QuantityOnHand { get; set; } = 0;
         public bool HasImage { get; set; } = false;
         public byte[]? Image { get; set; }
-        
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal Price { get; set; }
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal PriceIncl { get; set; }
-        [Column(TypeName = "decimal(18,2)")]
+
+        //[Column(TypeName = "decimal(18,2)")]
+        public decimal? Price { get; set; } 
+       // [Column(TypeName = "decimal(18,2)")]
+        public decimal? PriceIncl { get; set; } 
+      //  [Column(TypeName = "decimal(18,2)")]
         public bool OnSpecial { get; set; }
-        [Column(TypeName = "decimal(18,2)")]
+       // [Column(TypeName = "decimal(18,2)")] 
         public decimal? SpecialPrice { get; set; }
-        [Column(TypeName = "decimal(18,2)")]
+       // [Column(TypeName = "decimal(18,2)")]
         public decimal? TypicalOrderQuantity { get; set; }
         public decimal TaxPercentage { get; set; }
 

@@ -84,11 +84,11 @@
                                     BackgroundColor="#0698d5"
         
                             Margin="0">
-                                    <Image.GestureRecognizers>
+                                    <!--<Image.GestureRecognizers>
                                         <TapGestureRecognizer 
                                           Command="{Binding x:DataType='pageModels:ProductsListPageModel', Source={RelativeSource AncestorType={x:Type pageModels:ProductsListPageModel}}, Path=ProductPopupCommand}"
                                           CommandParameter="{Binding}" />
-                                    </Image.GestureRecognizers>
+                                    </Image.GestureRecognizers>-->
                                 </Image>
                             </Border>
 

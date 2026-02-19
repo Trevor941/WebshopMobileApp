@@ -86,8 +86,8 @@ namespace WebshopMobileApp.PageModels
                 cart.UnitOfSale = product.UOM.Trim();
                 cart.TaxPercentage = product.TaxPercentage;
 
-                cart.NettPrice = Math.Round(cart.Price * cart.Quantity, 2);
-                cart.VatTotal = Math.Round(cart.Price * (cart.TaxPercentage / 100), 2, MidpointRounding.AwayFromZero);
+                cart.NettPrice = Math.Round((cart.Price * cart.Quantity) ?? 0m, 2);
+                cart.VatTotal = Math.Round((cart.Price * (cart.TaxPercentage / 100)) ??0m, 2, MidpointRounding.AwayFromZero);
                 var Vat = Math.Round(cart.NettPrice * (cart.TaxPercentage / 100), 2);
                 cart.lineTotal = Math.Round(cart.NettPrice + Vat, 2);
                 cart.TotalInc = 0;

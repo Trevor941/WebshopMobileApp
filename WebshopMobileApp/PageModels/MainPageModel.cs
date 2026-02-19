@@ -32,9 +32,10 @@ namespace WebshopMobileApp.PageModels
 
         private async Task GetProducts()
         {
+
             try
             {
-               // await _productRepository.GetProductsFromAPICall();
+            //   await _productRepository.GetProductsFromAPICall();
                 await GetCategories();
             }
             catch (Exception ex)
