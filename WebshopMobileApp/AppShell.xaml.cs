@@ -97,41 +97,49 @@ namespace WebshopMobileApp
 
         public async Task LoadCategories()
         {
-            var categories = await _productRepository.GetCategoriesLocally();
-
-            if (categories.Count > 0)
+            try
             {
-                foreach (var category in categories)
+                var categories = await _productRepository.GetCategoriesLocally();
+
+                if (categories.Count > 0)
                 {
-                    // Add the category ID as a query parameter in the route
-                    // string routeWithQuery = $"{nameof(CatalogPage)}?categoryId={category.Id}";
-
-                    var shellContent = new ShellContent
+                    foreach (var category in categories)
                     {
-                        Title = category.CategoryName,
-                         Icon =  ImageSource.FromFile("catalog.png"),
-                        ContentTemplate = new DataTemplate(() => new Catalog(_model)),
-                        // Route = category.Route // unique Shell route
-                        Route = $"catalog_{category.CategoryId}"
-                    };
+                        // Add the category ID as a query parameter in the route
+                        // string routeWithQuery = $"{nameof(CatalogPage)}?categoryId={category.Id}";
 
-                    // Handle click/navigation using Shell
-                    shellContent.Appearing += async (s, e) =>
-                    {
-                        // await Shell.Current.GoToAsync($"//catalog? {category.CategoryId}" );
-                        if(category.CategoryId != null)
+                        var shellContent = new ShellContent
                         {
-                            if(category.CategoryId >= 0)
+                            Title = category.CategoryName,
+                            Icon = ImageSource.FromFile("catalog.png"),
+                            ContentTemplate = new DataTemplate(() => new Catalog(_model)),
+                            // Route = category.Route // unique Shell route
+                            Route = $"catalog_{category.CategoryId}"
+                        };
+
+                        // Handle click/navigation using Shell
+                        shellContent.Appearing += async (s, e) =>
+                        {
+                            // await Shell.Current.GoToAsync($"//catalog? {category.CategoryId}" );
+                            if (category.CategoryId != null)
                             {
-                                await Shell.Current.GoToAsync($"//catalog?categoryId={category.CategoryId}");
+                                if (category.CategoryId >= 0)
+                                {
+                                    await Shell.Current.GoToAsync($"//catalog?categoryId={category.CategoryId}");
+                                }
+
                             }
+                        };
 
-                        }
-                    };
-
-                    this.Items.Add(shellContent);
+                        this.Items.Add(shellContent);
+                    }
                 }
             }
+            catch (Exception ex) 
+            { 
+                Console.WriteLine(ex.Message.ToString());   
+            }
+          
         }
 
 
