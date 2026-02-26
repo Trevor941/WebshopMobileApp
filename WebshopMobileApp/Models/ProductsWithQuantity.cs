@@ -30,15 +30,17 @@ namespace WebshopMobileApp.Models
         protected void OnPropertyChanged(string name) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         public bool IsPromoted { get; set; } = false;
-        public string? FileUrl { get; set; }
-        public int ProductServerId { get; set; } 
+        public string FileUrl { get; set; } = "";
+        public string? ImageName { get; set; }
+        public int ProductServerId { get; set; }
+        public string Status { get; set; } = "";
     }
 
     public class Category 
     {
         [Key]
         public int Id { get; set; }
-        public int? CategoryId { get; set; }
+        public int CategoryId { get; set; }
         public string? CategoryName { get; set; }
         public string? FileUrl { get; set; }
     }

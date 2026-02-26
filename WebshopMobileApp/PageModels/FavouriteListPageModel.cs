@@ -160,7 +160,7 @@ namespace WebshopMobileApp.PageModels
 
             try
             {
-                Products = await _productRepository.GetProductsBySearchWord(searchText);
+              //  Products = await _productRepository.GetProductsBySearchWord(searchText);
             }
             catch (TaskCanceledException)
             {

@@ -23,6 +23,7 @@ namespace WebshopMobileApp.Data
             var options = new RestClientOptions(API_URL)
             {
                 // MaxTimeout = -1,
+                RemoteCertificateValidationCallback = (sender, cert, chain, errors) => true
             };
             var client = new RestClient(options);
             var request = new RestRequest("/api/Authentication/login", Method.Post);
@@ -34,33 +35,86 @@ namespace WebshopMobileApp.Data
             };
             var body = Newtonsoft.Json.JsonConvert.SerializeObject(userrequest);
             request.AddStringBody(body, DataFormat.Json);
-            RestResponse response = await client.ExecuteAsync(request);
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            RestResponse response = new();
+            
+            
+            response = await client.ExecuteAsync(request);
+            var userResponse=new UserResponse();
+            switch (response.StatusCode)
             {
-                Console.WriteLine(response.Content);
-                if (response.Content != null)
-                {
-                    var userResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<UserResponse>(response.Content);
-                    if (userResponse != null)
+                case System.Net.HttpStatusCode.OK:
+                    Console.WriteLine(response.Content);
+                    if (response.Content != null)
                     {
+                        userResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<UserResponse>(response.Content);
+                        if (userResponse != null)
+                        {
+                            return userResponse;
+                        }
+                        else
+                        {
+                            userResponse = new UserResponse();
+                            userResponse.Name = response.StatusCode.ToString();
+                            return userResponse;
+                        }
+                    }
+                    else
+                    {
+                        userResponse = new UserResponse();
+                        userResponse.Name = "1" +  response.ToString();
                         return userResponse;
                     }
-                }
-            }
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                    var userResponse = new UserResponse();
+                    break;
+                case System.Net.HttpStatusCode.Unauthorized:
+                    userResponse = new UserResponse();
                     userResponse.Name = "Username and password did not match";
                     return userResponse;
-            }
-            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest || response.StatusCode == System.Net.HttpStatusCode.MethodNotAllowed)
-            {
-                var userResponse = new UserResponse();
-                userResponse.Name = "Internal server error. Contact admin!";
-                return userResponse;
+                default:
+                    userResponse = new UserResponse();
+                    if (response.IsSuccessful && !string.IsNullOrEmpty(response.Content))
+                    {
+                        userResponse.Name = "2" + response.Content;
+                    }
+                    else
+                    {
+                        // log this
+                        var error = response.ErrorException;
+                        userResponse.Name = "2" + error!.ToString(); //response.StatusCode.ToString();
+                    }
+                    return userResponse;
             }
 
-            return new UserResponse();
+
+            //if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            //{
+            //    Console.WriteLine(response.Content);
+            //    if (response.Content != null)
+            //    {
+            //        var userResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<UserResponse>(response.Content);
+            //        if (userResponse != null)
+            //        {
+            //            return userResponse;
+            //        }
+            //    }
+            //}
+            //if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            //{
+            //        var userResponse = new UserResponse();
+            //        userResponse.Name = "Username and password did not match";
+            //        return userResponse;
+            //}
+            //if (response.StatusCode == System.Net.HttpStatusCode.BadRequest || response.StatusCode == System.Net.HttpStatusCode.MethodNotAllowed)
+            //{
+            //    var userResponse = new UserResponse();
+            //    userResponse.Name = /*"Internal server error. Contact admin! Bad request and method not allowed" +*/ response.StatusCode.ToString();
+            //    return userResponse;
+            //}
+
+           // UserResponse? userResponse1 = new UserResponse();
+           //// userResponse1 = null;
+           // userResponse1.Name = response!.Content!.ToString() + "TREV " + response.StatusCode.ToString();
+           // return  userResponse1;
+            // return new UserResponse();
         }
     }
 }

@@ -25,6 +25,7 @@ namespace WebshopMobileApp.Data
             var options = new RestClientOptions(API_URL)
             {
                 // MaxTimeout = -1,
+                RemoteCertificateValidationCallback = (sender, cert, chain, errors) => true
             };
             var client = new RestClient(options);
             if (customerId == 0)

@@ -14,13 +14,15 @@
 
     <!--<ContentPage.Behaviors>
             <toolkit:EventToCommandBehavior
-            EventName="Loaded"
+            EventName="Appearing"
             Command="{Binding AppearingLoadCommand}" />
     </ContentPage.Behaviors>-->
 
- 
+    <ScrollView>
 
-    <VerticalStackLayout Spacing="0" Padding="0, 0, 0 ,0">
+        <VerticalStackLayout Spacing="0" Padding="0, 0, 0 ,0">
+
+        
         <Border
             BackgroundColor="#ffffff"
             Stroke="#0698d5"
@@ -64,6 +66,10 @@
             </Grid>
         </Border>
 
+        <ActivityIndicator
+        IsVisible="{Binding ISVisibleSpinner}"
+        IsRunning="True"
+        Color="#0698d5" />
         <CollectionView x:Name="ProductsCollectionView"
         ItemsSource="{Binding Products}"
         Margin="10"  HeightRequest="550">
@@ -78,7 +84,7 @@
                             <!-- Product Image -->
                             <Border Stroke="Black" StrokeThickness="0" Padding="0"  StrokeShape="RoundRectangle 8">
                                 <Image Grid.Column="0"
-                            Source="{Binding FileUrl}"
+                            Source="{Binding ImageName}"
                             Aspect="AspectFill"
                                     HeightRequest="120"
                                     BackgroundColor="#0698d5"
@@ -142,6 +148,23 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-    </VerticalStackLayout>
+        <HorizontalStackLayout 
+        HorizontalOptions="Center" 
+        Spacing="20"
+        Margin="0,10" IsVisible="{Binding PaginationVisible}">
 
+            <Button Text="Previous"
+            Command="{Binding PreviousPageCommand}" BackgroundColor="#0698d5"/>
+
+            <!--<Label Text="{Binding CurrentPage}" 
+           VerticalOptions="Center"/>-->
+                        <Label Text="" 
+            VerticalOptions="Center"/>
+
+            <Button Text="Next"
+            Command="{Binding NextPageCommand}" BackgroundColor="#0698d5"/>
+
+        </HorizontalStackLayout>
+    </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

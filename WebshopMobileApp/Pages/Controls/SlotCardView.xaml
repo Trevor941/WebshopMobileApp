@@ -1,14 +1,30 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="WebshopMobileApp.Pages.Controls.SlotCardView">
+             x:Class="WebshopMobileApp.Pages.Controls.SlotCardView"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:pageModels="clr-namespace:WebshopMobileApp.PageModels"
+                 xmlns:models="clr-namespace:WebshopMobileApp.Models"
+                 x:DataType="models:TblPromoPicturesSet"
+             >
     
     
     
     <Border StrokeThickness="0" Stroke="#000" Padding="0" StrokeShape="RoundRectangle 0">
         <VerticalStackLayout Spacing="0">
             <!-- The inner WebView -->
-            <WebView x:Name="VideoWebView" HeightRequest="200" />
+            <!--<WebView x:Name="VideoWebView" HeightRequest="200" />-->
+            <!--<toolkit:MediaElement
+                Source="{Binding Url}"
+                HeightRequest="200" />-->
+            <toolkit:MediaElement
+                Volume ="1"
+                ShouldMute ="True"
+                ShouldAutoPlay="True" 
+                ShouldLoopPlayback="True"
+                ShouldShowPlaybackControls="True"
+            Source="{Binding Url}"
+            HeightRequest="200" />
         </VerticalStackLayout>
     </Border>
     

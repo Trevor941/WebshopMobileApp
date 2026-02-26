@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,7 +36,33 @@ namespace WebshopMobileApp.PageModels
         [ObservableProperty]
         private string _totalInc = string.Empty;
         public int OldQty = 1;
+        [ObservableProperty]
+        private bool _paginationVisible = false;
         private PopupRecommendedProduct _currentPopup;
+        private int _pageNumber = 1;
+        private  int PageSize = 30;
+        //private int _currentPage = 1;
+        public int CurrentPage { get; set; } = 1;
+        public int ProductCount { get; set; } = 0;
+        public int ProductSearchCount { get; set; } = 0;
+        public int ProductCatCount { get; set; } = 0;
+        //public int CurrentPage
+        //{
+        //    get => _currentPage;
+        //    set
+        //    {
+        //        if (_currentPage != value)
+        //        {
+        //            _currentPage = value;
+        //            OnPropertyChanged(nameof(CurrentPage));
+        //        }
+        //    }
+        //}
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
         public async void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             CategoryId = null;
@@ -123,7 +150,51 @@ namespace WebshopMobileApp.PageModels
         [RelayCommand]
         private async Task AppearingLoad()
         {
-            await LoadItems();
+            ISVisibleSpinner = true;
+            var products = new List<ProductsWithQuantity>();
+            while (products.Count == 0)
+            {
+                try
+                {
+                    products = await _productRepository.GetProductsLocally(PageSize, _pageNumber);
+
+                    if (products != null && products.Count > 0)
+                    {
+                        Console.WriteLine($"Found {products.Count} products at {DateTime.Now}");
+                        // Do something with the products
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No products found at {DateTime.Now}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error fetching products: {ex.Message}");
+                }
+
+                // Wait for 1 minute
+                await Task.Delay(TimeSpan.FromMinutes(1));
+            }
+            ISVisibleSpinner = true;
+            //await LoadItems();
+            //try
+            //{
+            //    var products = await _productRepository.GetProductsLocally();
+            //    if (products.Count < 30)
+            //    {
+            //        var productsAPI = await _productRepository.GetProductsFromAPICall();
+            //        if (productsAPI.Count > 0)
+            //        {
+            //            await _productRepository.InsertProducts(productsAPI);
+            //        }
+            //    }
+            //}
+            //catch(Exception ex)
+            //{
+            //    Console.WriteLine(ex.Message);
+            //}
+
         }
         
         [RelayCommand]
@@ -141,55 +212,174 @@ namespace WebshopMobileApp.PageModels
         [RelayCommand]
         private async Task LoadItems()
         {
-          //  await GetCartItems();
+            try
+            {
+                ProductCount = await _productRepository.GetTotalProductCount();
+                await FetchNewlyAddedProducts();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            CurrentPage = 1;
+            ISVisibleSpinner = true;
+            //await Task.Yield();
             SearchText = "";
-            ISVisibleSpinner = false;
+          //  ISVisibleSpinner = false;
            // DeliveryDate = "Delivery Date: " + DateTime.Now.AddDays(1).ToString("dd MMM yyyy");
             if(CategoryId != null && CategoryId != "")
             {
                 if(CategoryId == "0")
                 {
+                    //await Task.Yield();
                     await GetProducts();
+                    ISVisibleSpinner = false;
                     return;
                 }
+                //await Task.Yield();
                 await LoadProductsByCategory(CategoryId);
+                ISVisibleSpinner = false;
                 return;
             }
             else
             {
+                //await Task.Yield();
                 await GetProducts();
+                ISVisibleSpinner = false;
                 return;
+            }
+
+        }
+
+        public async Task FetchNewlyAddedProducts()
+        {
+            if (ProductCount > 0)
+            {
+                var xyz = await _productRepository.FetchNewlyAddedProductsAndPriceUpdates();
             }
         }
 
         public async Task LoadProductsByCategory(string categoryId)
         {
-            // Do whatever you need with the parameter
-            //var SearchedProducts = UnFilteredProducts.Where(x => x.CategoryId.ToString() == categoryId).ToList();
-            //if(SearchedProducts != null && SearchedProducts.Count > 0)
-            //{
-                UnFilteredProducts = await _productRepository.GetProductsByCategory(Int32.Parse(categoryId));
-                Products = UnFilteredProducts;
-                CategoryId = "0";
-                categoryId = "0";
-            //  }
-            // Maybe load catalog items from API based on this ID
+            ProductCatCount = await _productRepository.GetTotalProductByCategoryCount(Int32.Parse(categoryId));
+            try
+            {
+                UnFilteredProducts = await _productRepository.GetProductsByCategory(PageSize, CurrentPage, Int32.Parse(categoryId));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                var products = await _productRepository.GetProductsFromAPICall();
+                if (products.Count > 0)
+                {
+                    UnFilteredProducts = await _productRepository.GetProductsByCategory(PageSize, CurrentPage, Int32.Parse(categoryId));
+                }
+            }
+            Products = UnFilteredProducts;
+            if (ProductCatCount > PageSize)
+            {
+                PaginationVisible = true;
+            }
+            ISVisibleSpinner = false;
+           // CategoryId = "0";
+            categoryId = "0";
+
+        }
+
+        [RelayCommand]
+        private async Task NextPage()
+        {
+            var Products1 = Products;
+            if (ProductCount <= 30)
+            {
+                return;
+            }
+            if (SearchText == "" && CategoryId == "0")
+            {
+                if (ProductCount <= PageSize)
+                {
+                    return;
+                }
+                CurrentPage++;
+                await GetProducts();
+            }
+            if (CategoryId != "0" && CategoryId != null)
+            {
+                if(ProductCatCount <= PageSize)
+                {
+                    return;
+                }
+                CurrentPage++;
+                Products = await _productRepository.GetProductsByCategory(PageSize, CurrentPage, Int32.Parse(CategoryId));
+            }
+            if (SearchText.Length > 0)
+            {
+                if (ProductSearchCount <= PageSize)
+                {
+                    return;
+                }
+                CurrentPage++;
+                Products = await _productRepository.GetProductsBySearchWord(PageSize, CurrentPage, SearchText);
+            }
+            if (Products.Count == 0)
+            {
+                Products = Products1;
+                CurrentPage--;
+            }
+        }
+        [RelayCommand]
+        private async Task PreviousPage()
+        {
+            if (CurrentPage > 1)
+            {
+                CurrentPage--;
+                if (SearchText == "" && CategoryId == "0")
+                {
+                    await GetProducts();
+                }
+                if (CategoryId != "0" && CategoryId != null)
+                {
+                    Products = await _productRepository.GetProductsByCategory(PageSize, CurrentPage, Int32.Parse(CategoryId));
+                }
+                if (SearchText.Length > 0)
+                {
+                    Products = await _productRepository.GetProductsBySearchWord(PageSize, CurrentPage, SearchText);
+                }
+            }
         }
         private async Task GetProducts()
         {
             try
             {
-                UnFilteredProducts = await _productRepository.GetProductsLocally();
+                UnFilteredProducts = await _productRepository.GetProductsLocally(PageSize, CurrentPage);
+                if(UnFilteredProducts.Count == 0)
+                {
+                    var products = await _productRepository.GetProductsFromAPICall();
+                    if(products.Count > 0)
+                    {
+                        UnFilteredProducts = await _productRepository.GetProductsLocally(PageSize, CurrentPage);
+                    }
+                }
+                ISVisibleSpinner = false;
+                Products = UnFilteredProducts;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                var getitrue = await _productRepository.GetProductsFromAPICall();
-                if(getitrue == true)
+                var products = await _productRepository.GetProductsFromAPICall();
+                if(products.Count > 0)
                 {
-                    UnFilteredProducts = await _productRepository.GetProductsLocally();
+                    UnFilteredProducts = await _productRepository.GetProductsLocally(PageSize, CurrentPage);
                 }
+                ISVisibleSpinner = false;
             }
+            Products = UnFilteredProducts;
+            if (ProductCount >= PageSize)
+            {
+                PaginationVisible = true;
+            }
+            CategoryId = "0";
         }
 
         private async Task GetSlots()
@@ -207,6 +397,7 @@ namespace WebshopMobileApp.PageModels
 
         private async void FilterProducts(string searchText)
         {
+            var totalpro = 0;
             ISVisibleSpinner = true;
             var productsvar = UnFilteredProducts;
             Products = UnFilteredProducts;
@@ -228,13 +419,18 @@ namespace WebshopMobileApp.PageModels
               //      Products = results.ToList();
               ////  }
               ///
-              Products = await _productRepository.GetProductsBySearchWord(searchText);
+              Products = await _productRepository.GetProductsBySearchWord(PageSize, CurrentPage, searchText);
+                ProductSearchCount = await _productRepository.GetTotalProductBySearchCount(searchText);
             }
             catch (TaskCanceledException)
             {
                 // Ignore cancellation
             }
-           ISVisibleSpinner = false;
+            if (ProductSearchCount >= PageSize)
+            {
+                PaginationVisible = true;
+            }
+            ISVisibleSpinner = false;
 
         }
 

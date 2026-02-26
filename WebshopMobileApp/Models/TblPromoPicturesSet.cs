@@ -12,6 +12,12 @@ namespace WebshopMobileApp.Models
     //    public string Url { get; set; } = "";
     //}
 
+    public class ProductId 
+    { 
+        public int ProductServerId { get; set; }
+    }
+
+
     public class TblPromoPicturesSet
     {
         [JsonPropertyName("Id")]

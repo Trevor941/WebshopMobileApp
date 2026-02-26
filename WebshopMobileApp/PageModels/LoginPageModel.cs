@@ -46,41 +46,54 @@ namespace WebshopMobileApp.PageModels
 
             if (accessType == NetworkAccess.Internet)
             {
-                var response = await _loginRepository.LoginAPICall(_username, _password);
-                if (response != null)
-                {
-                    if (response.Token != null)
+                //try
+                //{
+                    var response = await _loginRepository.LoginAPICall(_username, _password);
+                    if (response != null)
                     {
-                        // var mainPage = new MainPageModel();
-                        try
+                        if (response.Token != null)
                         {
-                            Preferences.Default.Set("token", response.Token);
-                            Preferences.Default.Set("userEmail", Username);
-                            Preferences.Default.Set("name", response.Name);
-                            Preferences.Default.Set("customerId", response.CustomerId);
-                            //   _navigation.GoToMainApp();
-                            await Shell.Current.GoToAsync($"//home");
+                            // var mainPage = new MainPageModel();
+                            try
+                            {
+                                Preferences.Default.Set("token", response.Token);
+                                Preferences.Default.Set("userEmail", Username);
+                                Preferences.Default.Set("name", response.Name);
+                                Preferences.Default.Set("customerId", response.CustomerId);
+                                //   _navigation.GoToMainApp();
+                                await Shell.Current.GoToAsync($"//home");
 
-                            // Application.Current.MainPage = new NavigationPage(new WebshopMobileApp.Pages.MainPage());
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex.ToString());
-                        }
+                                // Application.Current.MainPage = new NavigationPage(new WebshopMobileApp.Pages.MainPage());
+                            }
+                            catch (Exception ex)
+                            {
+                                await AppShell.DisplayToastAsync("catch IN TOKEN" + ex.Message.ToString());
+                                Console.WriteLine(ex.ToString());
+                            }
 
-                    }
-                    else
-                    {
-                        if(response.Name != null)
-                        {
-                            await AppShell.DisplayToastAsync(response.Name);
                         }
                         else
                         {
-                            await AppShell.DisplayToastAsync("Internal server error. Contact admin!");
+                            if (response.Name != null)
+                            {
+                                await AppShell.DisplayToastAsync(response.Name);
+                            }
+                            else
+                            {
+                                await AppShell.DisplayToastAsync("response.Name");//await AppShell.DisplayToastAsync("Internal server error. Contact admin!");
+                            }
                         }
                     }
-                }
+                    else
+                    {
+                        await AppShell.DisplayToastAsync("response IS NULL");
+                    }
+             //   }
+                //catch(Exception ex)
+                //{
+                //    await AppShell.DisplayToastAsync("catchDisplayToastAsync" + ex.Message.ToString());
+                //    Console.WriteLine(ex.ToString());
+                //}
            
             }
             else

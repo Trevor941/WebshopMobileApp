@@ -27,6 +27,24 @@
                     <VerticalStackLayout Spacing="0">
 
                         <!-- TOP LABEL -->
+                        <Label Text="Fetching data from the server  for the first time takes a little while. Please wait ..."
+                            Padding="10"
+                            Margin="0,0,0,0"
+                            BackgroundColor="#0698d5"
+                            FontSize="16"
+                             FontAttributes="Italic"
+                            TextColor="White"
+                               HeightRequest="100"
+                               IsVisible="{Binding PleaseWaitMessage}"
+                            Style="{StaticResource Title2}"
+                            HorizontalTextAlignment="Center" />
+                           <ActivityIndicator Margin="0,0,0,10"
+                            IsVisible="{Binding PleaseWaitSpinner}"
+                            IsRunning="True"
+                            HeightRequest="300"
+                            Color="White" BackgroundColor="#0698d5" />
+
+                        <!-- TOP LABEL -->
                         <Label Text="{Binding DeliveryDate}"
                            Padding="10"
                            Margin="0,0,0,10"
@@ -56,14 +74,14 @@
                             <ScrollView Orientation="Horizontal"
                         Margin="-30,0">
                                 <HorizontalStackLayout
-                    Spacing="15"
-                    Padding="30,0"
-                    BindableLayout.ItemsSource="{Binding Slots}">
+                                    Spacing="15"
+                                    Padding="30,0"
+                                    BindableLayout.ItemsSource="{Binding Slots}">
 
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="models:TblPromoPicturesSet">
                                             <VerticalStackLayout Spacing="6">
-                                                <controls:SlotCardView WidthRequest="220" />
+                                                <controls:SlotCardView WidthRequest="300" />
                                             </VerticalStackLayout>
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
@@ -99,6 +117,7 @@
                                    WidthRequest="100"
                                    HorizontalOptions="Center"
                                    VerticalOptions="Center" />-->
+                            
                             <Image Source="{Binding FileUrl}"
                                     Aspect="AspectFit"
                                     HeightRequest="80"
